@@ -57,9 +57,10 @@ def extract_coords(train_path, train_dot_path, out_dir):
                 # print x1, x2, y1, y2
                 if x1 < 0 or y1 < 0 or x2 > image_1.shape[1] or y2 > image_1.shape[0]:
                     continue
-                x, y, w, h = convert_coord(x, y, w, h)    # convert to ratio required by darknet
+                x_center, y_center, w_ratio, h_ratio = convert_coord(x, y, w, h)    # convert to ratio required by darknet
                 # get the color of the pixel from Train Dotted in the center of the blob
-                file.write("0" + " " + str(x) + " " + str(y) + " " + str(w) + " " + str(h) + "\n")
+                file.write("0" + " " + str(x_center) + " " + str(y_center) + " " + str(w_ratio) + " " + str(h_ratio) + "\n")
+                # file.write("0" + " " + str(x1) + " " + str(y1) + " " + str(x2) + " " + str(y2) + "\n")
 
 
 def convert_coord(x, y, w_img, h_img):
@@ -67,8 +68,8 @@ def convert_coord(x, y, w_img, h_img):
     dh = 1. / h_img
     x_center = x * dw
     y_center = y * dh
-    w_ratio = 32. / w_img
-    h_ratio = 32. / h_img
+    w_ratio = 32 * dw
+    h_ratio = 32 * dh
     return x_center, y_center, w_ratio, h_ratio
 
 def splitimage(src, rownum, colnum, dstpath):
