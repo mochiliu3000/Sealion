@@ -39,14 +39,33 @@ def extract_coords(train_path, train_dot_path, out_dir):
             continue   # skip
         # detect blobs
         blobs = skimage.feature.blob_log(image_3, min_sigma=3, max_sigma=4, num_sigma=1, threshold=0.02)
+        print image_1.shape
         blob_num = len(blobs)
+
+        w = image_1.shape[0]
+        h = image_2.shape[1]
+
         with open(out_dir + "/" + filename + ".txt", "wb") as file:
             for blob in blobs:
                 # get the coordinates for each blob
                 y, x, s = blob
                 x1, x2, y1, y2 = x-16, x+16, y-16, y+16
+                # print x1, x2, y1, y2
+                if x1 < 0 or y1 < 0 or x2 > image_1.shape[1] or y2 > image_1.shape[0]:
+                    continue
+                x, y, w, h = convert_coord(x, y, w, h)    # convert to ratio required by darknet
                 # get the color of the pixel from Train Dotted in the center of the blob
-                file.write("1" + " " + str(x1) + " " + str(y1) + " " + str(x2) + " " + str(y2) + "\n")
+                file.write("0" + " " + str(x) + " " + str(y) + " " + str(w) + " " + str(h) + "\n")
+
+
+def convert_coord(x, y, w_img, h_img):
+    dw = 1. / w_img
+    dh = 1. / h_img
+    x_center = x * dw
+    y_center = y * dh
+    w_ratio = 32. / w_img
+    h_ratio = 32. / h_img
+    return x_center, y_center, w_ratio, h_ratio
 
 def splitimage(src, rownum, colnum, dstpath):
     ext = "jpeg"
@@ -97,5 +116,4 @@ if __name__ == '__main__':
     outdir = "./data/TrainSmall2/labels"
 
     extract_coords(train_path, train_dot_path, out_dir=outdir)
-
     # splitimage("./data/TrainSmall2/Train/41.jpg", 6, 6, "./data/TrainSmall2/Train_split")
