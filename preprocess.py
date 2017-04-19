@@ -61,8 +61,8 @@ def extract_coords(train_path, train_dot_path, out_dir):
         print image_1.shape
         blob_num = len(blobs)
 
-        w = image_1.shape[0]
-        h = image_1.shape[1]
+        w = image_1.shape[1]
+        h = image_1.shape[0]
 
         with open(out_dir + "/" + basename + ".txt", "wb") as file:
             for blob in blobs:
