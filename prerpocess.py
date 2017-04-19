@@ -34,8 +34,12 @@ def extract_coords(train_path, train_dot_path, out_dir):
 
         # convert to grayscale to be accepted by skimage.feature.blob_log
         image_3 = cv2.cvtColor(image_3, cv2.COLOR_BGR2GRAY)
+
+        fn_splt = filename.split('.')
+        basename = fn_splt[0]
+
         if np.count_nonzero(image_3) == 0:
-            open(out_dir + "/" + filename + ".txt", "wb").close()
+            open(out_dir + "/" + basename + ".txt", "wb").close()
             continue   # skip
         # detect blobs
         blobs = skimage.feature.blob_log(image_3, min_sigma=3, max_sigma=4, num_sigma=1, threshold=0.02)
@@ -45,7 +49,7 @@ def extract_coords(train_path, train_dot_path, out_dir):
         w = image_1.shape[0]
         h = image_2.shape[1]
 
-        with open(out_dir + "/" + filename + ".txt", "wb") as file:
+        with open(out_dir + "/" + basename + ".txt", "wb") as file:
             for blob in blobs:
                 # get the coordinates for each blob
                 y, x, s = blob
