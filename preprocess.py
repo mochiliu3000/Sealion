@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import os
 import skimage.feature
-from sklearn.preprocessing import LabelBinarizer
+# from sklearn.preprocessing import LabelBinarizer
 import cv2
 import csv
 from PIL import Image
+from sets import Set
 import matplotlib.pyplot as plt
 
 
@@ -88,7 +89,7 @@ def convert_coord(x, y, w_img, h_img):
     return x_center, y_center, w_ratio, h_ratio
 
 def splitimage(src, rownum, colnum, dstpath):
-    ext = "jpeg"
+    ext = "JPEG"
     img = Image.open(src)
     w, h = img.size
     if rownum <= h and colnum <= w:
@@ -130,10 +131,31 @@ def splitimage(src, rownum, colnum, dstpath):
         # coordinates_df["juveniles"][filename] = juveniles
         # coordinates_df["pups"][filename] = pups
 
-if __name__ == '__main__':
-    train_path = "./data/TrainSmall2/Train_split"
-    train_dot_path = "./data/TrainSmall2/TrainDotted_split"
-    outdir = "./data/TrainSmall2/labels"
+def split_images(src_folder, dst_folder, skip_set):
+    all_img_set = Set(os.listdir(src_folder))
+    images = all_img_set - skip_set
+    for image in images:
+        path = src_folder + "/" + image
+        splitimage(path, 6, 6, dst_folder)
 
-    extract_coords(train_path, train_dot_path, out_dir=outdir)
-    # splitimage("./data/TrainSmall2/Train/41.jpg", 6, 6, "./data/TrainSmall2/Train_split")
+def skip_img_set(path):
+    skip_set = Set()
+    with open(path) as f:
+        next(f)
+        [skip_set.add(img_id[:-1] + ".jpg") for img_id in f]
+    return skip_set
+
+if __name__ == '__main__':
+    train_path = "./data/Train"
+    train_dotted_path = "./data/TrainDotted"
+    train_split_dst = "./data/JPEGImages"
+    train_dotted_split_dst = "./data/JPEGDottedImages"
+
+    label_dir = "./data/labels"
+    skip_img_path = "./data/MismatchedTrainImages.txt"
+
+    skipped_img_ids = skip_img_set(skip_img_path)
+    split_images(train_path, train_split_dst, skipped_img_ids)
+    split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
+
+    extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)
