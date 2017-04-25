@@ -78,7 +78,7 @@ def extract_coords(train_path, train_dot_path, out_dir):
                     # get the color of the pixel from Train Dotted in the center of the blob
                     file.write("0" + " " + str(x_center) + " " + str(y_center) + " " + str(w_ratio) + " " + str(h_ratio) + "\n")
                     # file.write("0" + " " + str(x1) + " " + str(y1) + " " + str(x2) + " " + str(y2) + "\n")
-            if blob.size > 0:
+            if blob_num > 0:
                 tr_file.write(train_path + "/" + filename + ".JPEG\n")
 
 def convert_coord(x, y, w_img, h_img):
