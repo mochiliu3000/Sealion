@@ -12,72 +12,74 @@ import matplotlib.pyplot as plt
 
 def extract_coords(train_path, train_dot_path, out_dir):
     file_names = os.listdir(train_path)
-    for filename in file_names:
-        # filename = "41_27.jpeg"          # Testing a bug
-        print("processing image: " + str(filename))
-        # read the Train and Train Dotted images
-        try:
-            image_1 = cv2.imread(train_dot_path + "/" + filename)
-            image_2 = cv2.imread(train_path + "/" + filename)
-        except: continue
-        # absolute difference between Train and Train Dotted
-        image_3 = cv2.absdiff(image_1, image_2)
-        # plt.imshow(image_1)
-        # plt.show()
-        # plt.imshow(image_2)
-        # plt.show()
-        # plt.imshow(image_3)
-        # plt.show()
+    with open(out_dir + "/all.txt", "wb") as tr_file:
+        for filename in file_names:
+            # filename = "41_27.jpeg"          # Testing a bug
+            print("processing image: " + str(filename))
+            # read the Train and Train Dotted images
+            try:
+                image_1 = cv2.imread(train_dot_path + "/" + filename)
+                image_2 = cv2.imread(train_path + "/" + filename)
+            except: continue
+            # absolute difference between Train and Train Dotted
+            image_3 = cv2.absdiff(image_1, image_2)
+            # plt.imshow(image_1)
+            # plt.show()
+            # plt.imshow(image_2)
+            # plt.show()
+            # plt.imshow(image_3)
+            # plt.show()
 
-        # mask out blackened regions from Train Dotted
-        mask_1 = cv2.cvtColor(image_1, cv2.COLOR_BGR2GRAY)
-        mask_1[mask_1 < 50] = 0
-        mask_1[mask_1 > 0] = 255
-        # plt.imshow(mask_1)
-        # plt.show()
+            # mask out blackened regions from Train Dotted
+            mask_1 = cv2.cvtColor(image_1, cv2.COLOR_BGR2GRAY)
+            mask_1[mask_1 < 50] = 0
+            mask_1[mask_1 > 0] = 255
+            # plt.imshow(mask_1)
+            # plt.show()
 
-        mask_2 = cv2.cvtColor(image_2, cv2.COLOR_BGR2GRAY)
-        mask_2[mask_2 < 50] = 0
-        mask_2[mask_2 > 0] = 255
-        # plt.imshow(mask_2)
-        # plt.show()
+            mask_2 = cv2.cvtColor(image_2, cv2.COLOR_BGR2GRAY)
+            mask_2[mask_2 < 50] = 0
+            mask_2[mask_2 > 0] = 255
+            # plt.imshow(mask_2)
+            # plt.show()
 
-        image_3 = cv2.bitwise_or(image_3, image_3, mask=mask_1)
-        image_3 = cv2.bitwise_or(image_3, image_3, mask=mask_2)
+            image_3 = cv2.bitwise_or(image_3, image_3, mask=mask_1)
+            image_3 = cv2.bitwise_or(image_3, image_3, mask=mask_2)
 
-        # plt.imshow(image_3)
-        # plt.show()
+            # plt.imshow(image_3)
+            # plt.show()
 
-        # convert to grayscale to be accepted by skimage.feature.blob_log
-        image_3 = cv2.cvtColor(image_3, cv2.COLOR_BGR2GRAY)
+            # convert to grayscale to be accepted by skimage.feature.blob_log
+            image_3 = cv2.cvtColor(image_3, cv2.COLOR_BGR2GRAY)
 
-        fn_splt = filename.split('.')
-        basename = fn_splt[0]
+            fn_splt = filename.split('.')
+            basename = fn_splt[0]
 
-        if np.count_nonzero(image_3) == 0:
-            open(out_dir + "/" + basename + ".txt", "wb").close()
-            continue   # skip
-        # detect blobs
-        blobs = skimage.feature.blob_log(image_3, min_sigma=3, max_sigma=4, num_sigma=1, threshold=0.02)
-        print image_1.shape
-        blob_num = len(blobs)
+            if np.count_nonzero(image_3) == 0:
+                open(out_dir + "/" + basename + ".txt", "wb").close()
+                continue   # skip
+            # detect blobs
+            blobs = skimage.feature.blob_log(image_3, min_sigma=3, max_sigma=4, num_sigma=1, threshold=0.02)
+            print image_1.shape
+            blob_num = len(blobs)
 
-        w = image_1.shape[1]
-        h = image_1.shape[0]
+            w = image_1.shape[1]
+            h = image_1.shape[0]
 
-        with open(out_dir + "/" + basename + ".txt", "wb") as file:
-            for blob in blobs:
-                # get the coordinates for each blob
-                y, x, s = blob
-                x1, x2, y1, y2 = x-16, x+16, y-16, y+16
-                # print x1, x2, y1, y2
-                if x1 < 0 or y1 < 0 or x2 > image_1.shape[1] or y2 > image_1.shape[0]:
-                    continue
-                x_center, y_center, w_ratio, h_ratio = convert_coord(x, y, w, h)    # convert to ratio required by darknet
-                # get the color of the pixel from Train Dotted in the center of the blob
-                file.write("0" + " " + str(x_center) + " " + str(y_center) + " " + str(w_ratio) + " " + str(h_ratio) + "\n")
-                # file.write("0" + " " + str(x1) + " " + str(y1) + " " + str(x2) + " " + str(y2) + "\n")
-
+            with open(out_dir + "/" + basename + ".txt", "wb") as file:
+                for blob in blobs:
+                    # get the coordinates for each blob
+                    y, x, s = blob
+                    x1, x2, y1, y2 = x-16, x+16, y-16, y+16
+                    # print x1, x2, y1, y2
+                    if x1 < 0 or y1 < 0 or x2 > image_1.shape[1] or y2 > image_1.shape[0]:
+                        continue
+                    x_center, y_center, w_ratio, h_ratio = convert_coord(x, y, w, h)    # convert to ratio required by darknet
+                    # get the color of the pixel from Train Dotted in the center of the blob
+                    file.write("0" + " " + str(x_center) + " " + str(y_center) + " " + str(w_ratio) + " " + str(h_ratio) + "\n")
+                    # file.write("0" + " " + str(x1) + " " + str(y1) + " " + str(x2) + " " + str(y2) + "\n")
+            if blob.size > 0:
+                tr_file.write(train_path + "/" + filename + ".JPEG\n")
 
 def convert_coord(x, y, w_img, h_img):
     dw = 1. / w_img
