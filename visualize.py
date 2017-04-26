@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import matplotlib.pyplot as plt
 
 
 """
@@ -58,6 +59,11 @@ def parse_log(path):
                 df_backward = df_backward.append({'iter': search_second.group(1), 'Avg_Loss': search_second.group(2)}, ignore_index=True)
     return df_forward, df_backward
 
+def visualize(df, col_name):
+    plt.figure()
+    plt.plot(df[col_name])
+    plt.show()
+
 if __name__ == '__main__':
     # parse_backward("1: 271.264893, 271.264893 avg, 0.000000 rate, 97.467979 seconds, 1 images")
 
@@ -65,4 +71,7 @@ if __name__ == '__main__':
     print df_forward
     print df_backward
 
+    columns = ['Region_Avg_IOU', 'Class', 'Obj', 'No_Obj', 'Avg_Recall', 'count']
+    for c in columns:
+        visualize(df_forward, c)
 
