@@ -1,0 +1,5 @@
+Region Avg IOU: 0.067026, Class: 1.000000, Obj: 0.529600, No Obj: 0.508836, Avg Recall: 0.000000,  count: 4
+1: 271.264893, 271.264893 avg, 0.000000 rate, 97.467979 seconds, 1 images
+Region Avg IOU: 0.043307, Class: 1.000000, Obj: 0.636681, No Obj: 0.508440, Avg Recall: 0.000000,  count: 25
+Loaded: 0.000058 seconds
+2: 636.097351, 307.748138 avg, 0.000000 rate, 95.968941 seconds, 2 images
