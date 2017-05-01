@@ -56,7 +56,7 @@ def parse_log(path):
                                    'Avg_Recall': search_first.group(5), 'count': search_first.group(6)}, True)
             search_second = backward_regex.search(line)
             if search_second:
-                df_backward = df_backward.append({'iter': search_second.group(1), 'Avg_Loss': search_second.group(2)}, ignore_index=True)
+                df_backward = df_backward.append({'iter': search_second.group(1), 'Avg_Loss': search_second.group(3)}, ignore_index=True)
     return df_forward, df_backward
 
 def visualize(df, col_name):
@@ -67,11 +67,13 @@ def visualize(df, col_name):
 if __name__ == '__main__':
     # parse_backward("1: 271.264893, 271.264893 avg, 0.000000 rate, 97.467979 seconds, 1 images")
 
-    df_forward, df_backward = parse_log("./log_example.log")
+    df_forward, df_backward = parse_log("/home/sleepywyn/Dev/GitRepo/darknet/sealion.log")
     print df_forward
     print df_backward
 
-    columns = ['Region_Avg_IOU', 'Class', 'Obj', 'No_Obj', 'Avg_Recall', 'count']
+    columns = ['Region_Avg_IOU', 'Class', 'Obj', 'No_Obj', 'Avg_Recall']
     for c in columns:
         visualize(df_forward, c)
+
+    visualize(df_backward, 'Avg_Loss')
 
