@@ -7,8 +7,11 @@ import cv2
 import csv
 from PIL import Image
 from sets import Set
-import matplotlib.pyplot as plt
+from multiprocessing import Pool
+from functools import partial
 
+
+thread_num = 5
 
 def extract_coords(train_path, train_dot_path, out_dir):
     file_names = os.listdir(train_path)
@@ -90,7 +93,7 @@ def convert_coord(x, y, w_img, h_img):
     h_ratio = 32 * dh
     return x_center, y_center, w_ratio, h_ratio
 
-def splitimage(src, rownum, colnum, dstpath):
+def splitimage(rownum, colnum, dstpath, src):
     ext = "JPEG"
     img = Image.open(src)
     w, h = img.size
@@ -136,9 +139,13 @@ def splitimage(src, rownum, colnum, dstpath):
 def split_images(src_folder, dst_folder, skip_set):
     all_img_set = Set(os.listdir(src_folder))
     images = all_img_set - skip_set
-    for image in images:
-        path = src_folder + "/" + image
-        splitimage(path, 6, 6, dst_folder)
+
+    images = map(lambda x: src_folder + "/" + x, images)
+
+    func = partial(splitimage, 12, 12, dst_folder)
+    pool = Pool(thread_num)
+    pool.map(func, images)
+
 
 def skip_img_set(path):
     skip_set = Set()
