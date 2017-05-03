@@ -73,16 +73,39 @@ def extract_coord(train_path, train_dot_path, out_dir, filename):
             for blob in blobs:
                 # get the coordinates for each blob
                 y, x, s = blob
-                x1, x2, y1, y2 = x - 16, x + 16, y - 16, y + 16
+                # get the color of the pixel from Train Dotted in the center of the blob
+                b, g, r = image_1[int(y)][int(x)][:]
+                # decision tree to pick the class of the blob by looking at the color in Train Dotted
+                if r > 200 and b < 50 and g < 50: # RED adult_males 67.4
+                    x1, x2, y1, y2 = x - 67.4/2.0, x + 67.4/2.0, y - 67.4/2.0, y + 67.4/2.0
+                    inx = 0
+                elif r > 200 and b > 200 and g < 50: # MAGENTA subadult_males 53.6
+                    x1, x2, y1, y2 = x - 53.6/2.0, x + 53.6/2.0, y - 53.6/2.0, y + 53.6/2.0
+                    inx = 1					
+                elif r < 100 and b < 100 and 150 < g < 200: # GREEN pups 
+                    print "Here is a pup, won't track it"
+                    continue
+                elif r < 100 and  100 < b and g < 100: # BLUE juveniles 34.0
+                    x1, x2, y1, y2 = x - 34.0/2.0, x + 34.0/2.0, y - 34.0/2.0, y + 34.0/2.0
+                    inx = 2
+                elif r < 150 and b < 50 and g < 100:  # BROWN adult_females 53.6
+                    x1, x2, y1, y2 = x - 53.6/2.0, x + 53.6/2.0, y - 53.6/2.0, y + 53.6/2.0
+                    inx = 3					
+                else:
+                    print "Error point, the color is unknown... skip it for now"
+                    continue
+                             
                 # print x1, x2, y1, y2
                 if x1 < 0 or y1 < 0 or x2 > image_1.shape[1] or y2 > image_1.shape[0]:
+                    print "Error point, the bbox is on the edge of image... skip it for now"
                     continue
-                x_center, y_center, w_ratio, h_ratio = convert_coord(x, y, w, h)  # convert to ratio required by darknet
+                bbox_sizes = [67.4, 53.6, 34.0, 53.6]
+                x_center, y_center, w_ratio, h_ratio = convert_coord(x, y, w, h, bbox_sizes[inx])  # convert to ratio required by darknet
                 # get the color of the pixel from Train Dotted in the center of the blob
-                file.write("0" + " " + str(x_center) + " " + str(y_center) + " " + str(w_ratio) + " " + str(h_ratio) + "\n")
+                file.write(str(inx) + " " + str(x_center) + " " + str(y_center) + " " + str(w_ratio) + " " + str(h_ratio) + "\n")
                 # file.write("0" + " " + str(x1) + " " + str(y1) + " " + str(x2) + " " + str(y2) + "\n")
 
-        print "+++++++++++++++++++++" + str(blob_num)
+        print("The blob num is "  + str(blob_num))
         with open(out_dir + "/all.txt", "a") as tr_file:
             tr_file.write(train_path + "/" + filename + "\n")
 
@@ -160,13 +183,13 @@ def extract_coords(train_path, train_dot_path, out_dir):
         #     if blob_num > 0:
         #         tr_file.write(train_path + "/" + filename + "\n")
 
-def convert_coord(x, y, w_img, h_img):
+def convert_coord(x, y, w_img, h_img, bbox_size):
     dw = 1. / w_img
     dh = 1. / h_img
     x_center = x * dw
     y_center = y * dh
-    w_ratio = 32 * dw
-    h_ratio = 32 * dh
+    w_ratio = bbox_size * dw
+    h_ratio = bbox_size * dh
     return x_center, y_center, w_ratio, h_ratio
 
 def splitimage(rownum, colnum, dstpath, src):
