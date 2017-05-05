@@ -263,14 +263,15 @@ if __name__ == '__main__':
     label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
     skip_img_path = "./data/MismatchedTrainImages.txt"
 
+    # for splitting addon images
     # train_path = "./data/addon_samples/mismatch"
     # train_dotted_path = "./data/addon_samples/mismatchDotted"
     # train_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatch"   # should be absolute path here
     # train_dotted_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatchDotted"  # should be absolute path here
     # label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
+    # skipped_img_ids = ()
 
     # skipped_img_ids = skip_img_set(skip_img_path)
-    skipped_img_ids = ()
     split_images(train_path, train_split_dst, skipped_img_ids)
     split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
 
