@@ -255,6 +255,22 @@ def skip_img_set(path):
         [skip_set.add(img_id[:-1] + ".jpg") for img_id in f]
     return skip_set
 
+
+def rotate_label(degree, x, y, width, height):
+    if degree == 90:
+        return y, 1-x, height, width
+    if degree == 180:
+        return 1-x, 1-y, width, height
+    if degree == 270:
+        return 1-y, x, height, width
+
+
+def reverse_label(direction, x, y, width, height):
+    if direction == "horizontal":
+        return 1-x, y, width, height
+    if direction == "vertical":
+        return x, 1-y, width, height
+
 if __name__ == '__main__':
     train_path = "./data/Train"
     train_dotted_path = "./data/TrainDotted"
