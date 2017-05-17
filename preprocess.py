@@ -11,7 +11,7 @@ from multiprocessing import Pool
 from functools import partial
 
 
-thread_num = 2
+thread_num = 6
 
 
 def extract_coord(train_path, train_dot_path, out_dir, filename):
@@ -243,7 +243,7 @@ def split_images(src_folder, dst_folder, skip_set):
 
     print images
 
-    func = partial(splitimage, 12, 12, dst_folder)
+    func = partial(splitimage, 12, 16, dst_folder)
     pool = Pool(thread_num)
     pool.map(func, images)
 
@@ -274,14 +274,21 @@ def reverse_label(direction, x, y, width, height):
 if __name__ == '__main__':
     train_path = "./data/Train"
     train_dotted_path = "./data/TrainDotted"
-    train_split_dst = "./data/JPEGImages"   # should be absolute path here
-    train_dotted_split_dst = "./data/JPEGDottedImages"  # should be absolute path here
-
-    label_dir = "./data/labels"
+    train_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/JPEGImages"   # should be absolute path here
+    train_dotted_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/JPEGDottedImages"  # should be absolute path here
+    label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
     skip_img_path = "./data/MismatchedTrainImages.txt"
 
-    # skipped_img_ids = skip_img_set(skip_img_path)
-    # split_images(train_path, train_split_dst, skipped_img_ids)
-    # split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
+    # for splitting addon images
+    # train_path = "./data/addon_samples/mismatch"
+    # train_dotted_path = "./data/addon_samples/mismatchDotted"
+    # train_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatch"   # should be absolute path here
+    # train_dotted_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatchDotted"  # should be absolute path here
+    # label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
+    # skipped_img_ids = ()
 
-    extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)
+    # skipped_img_ids = skip_img_set(skip_img_path)
+    split_images(train_path, train_split_dst, skipped_img_ids)
+    split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
+
+    # extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)

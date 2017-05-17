@@ -13,5 +13,11 @@ def gen_nonzero_label(label_dir, image_dir, out_dir):
 				num_lines = sum(1 for line in open(label_dir + "/" + label_file))
 				if num_lines > 0:
 					tr_file.write(image_dir + "/" + label_file[:-3] + "JPEG\n")
-					
-gen_nonzero_label(label_dir, image_dir, out_dir)
+
+def batch_rename(path):
+	for file_name in os.listdir(path):
+		os.rename(path + "/" + file_name, path + "/" + file_name[:-3] + "JPEG")
+
+
+if __name__ == '__main__':
+	gen_nonzero_label(label_dir, image_dir, out_dir)
