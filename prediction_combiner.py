@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 
 def parse_prediction(log_path, outdir):
     # /Users/ibm/GitRepo/darknet/data/0_8.JPEG: Predicted in 40.548927 seconds.
@@ -6,23 +7,32 @@ def parse_prediction(log_path, outdir):
     # ad_female: 25%
     kind_regex = re.compile("^(ad_male|sub_male|juvenile|ad_female): [0-9]*%\\s+$")
 
+
+    df = pd.DataFrame(columns=['img', 'ad_male', 'sub_male', 'juvenile', 'ad_female'])
+
     with open(log_path, "r") as log:
         img_path_no_ext = ""
         ad_male_counter, sub_male_counter, juvenile_counter, ad_female_counter = 0, 0, 0, 0
+        first_flag = True
         for line in log:
             search_start = start_line_regex.search(line)
             if search_start:
                 img_path_no_ext = search_start.group(1)
+                print "parsing" + img_path_no_ext + " Result for the last image will be append to df firstly."
+                if first_flag:
+                    first_flag = False
+                    continue
                 # save count then clear
-                print "Count for different kinds: " + str(ad_male_counter) + " " + str(sub_male_counter) + " " + str(juvenile_counter) + " " + str(ad_female_counter)
+                # print "Count for different kinds: " + str(ad_male_counter) + " " + str(sub_male_counter) + " " + str(juvenile_counter) + " " + str(ad_female_counter)
+                df = df.append({'img': img_path_no_ext, 'ad_male': ad_male_counter, 'sub_male': sub_male_counter, 'juvenile': juvenile_counter,
+                                   'ad_female': ad_female_counter}, True)
 
                 ad_male_counter, sub_male_counter, juvenile_counter, ad_female_counter = 0, 0, 0, 0
-                print "parsing" + img_path_no_ext
                 continue
             kind_line = kind_regex.search(line)
             if kind_line:
                 kind = kind_line.group(1)
-                print kind
+                # print kind
                 if kind == "ad_male":
                     ad_male_counter += 1
                 elif kind == "sub_male":
@@ -31,11 +41,15 @@ def parse_prediction(log_path, outdir):
                     juvenile_counter += 1
                 elif kind == "ad_female":
                     ad_female_counter += 1
-        print "Count for different kinds: " + str(ad_male_counter) + " " + str(sub_male_counter) + " " + str(
-            juvenile_counter) + " " + str(ad_female_counter)
-
+        # print "Count for different kinds: " + str(ad_male_counter) + " " + str(sub_male_counter) + " " + str(
+        #     juvenile_counter) + " " + str(ad_female_counter)
+        df = df.append({'img': img_path_no_ext, 'ad_male': ad_male_counter, 'sub_male': sub_male_counter,
+                        'juvenile': juvenile_counter,
+                        'ad_female': ad_female_counter}, True)
+        return df
 
 if __name__ == '__main__':
-    parse_prediction("./prediction_log_example", "./data/prediction")
+    result_df = parse_prediction("./prediction_log_example", "./data/prediction")
+    print result_df
 
 
