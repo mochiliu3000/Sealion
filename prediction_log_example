@@ -40,7 +40,7 @@ layer     filters    size              input                output
    29 conv     45  1 x 1 / 1    13 x  13 x1024   ->    13 x  13 x  45
    30 detection
 Loading weights from backup/sealion_600.weights...Done!
-/Users/ibm/GitRepo/darknet/data/0_8.JPEG: Predicted in 40.548927 seconds.
+/Users/ibm/GitRepo/darknet/data/0_8.JPEG: Predicted in 43.345528 seconds.
 ad_female: 25%
 ad_female: 27%
 ad_female: 39%
@@ -66,10 +66,18 @@ ad_female: 35%
 ad_female: 39%
 ad_female: 35%
 Not compiled with OpenCV, saving to predictions.png instead
-/Users/ibm/GitRepo/darknet/data/7_88.JPEG: Predicted in 41.231216 seconds.
+/Users/ibm/GitRepo/darknet/data/7_88.JPEG: Predicted in 43.374088 seconds.
 ad_female: 27%
 ad_female: 34%
-juvenlie: 27%
-juvenlie: 28%
-juvenlie: 25%
+juvenile: 27%
+juvenile: 28%
+juvenile: 25%
 Not compiled with OpenCV, saving to predictions.png instead
+Cannot load image "classes"
+STB Reason: can't fopen
+Process exited with status 0
+logout
+Saving session...
+...copying shared history...
+...saving history...truncating history files...
+...completed.
