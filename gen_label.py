@@ -20,4 +20,5 @@ def batch_rename(path):
 
 
 if __name__ == '__main__':
-	gen_nonzero_label(label_dir, image_dir, out_dir)
+	# gen_nonzero_label(label_dir, image_dir, out_dir)
+	batch_rename("./data/Yolo_mark_result/JPEGImages")
