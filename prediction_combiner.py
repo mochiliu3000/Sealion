@@ -50,7 +50,7 @@ def parse_prediction(log_path, outdir):
         return df
 
 def sum_prediction(df):
-    img_id_regex = re.compile("^.*/(\\d+_\\d+)$")
+    img_id_regex = re.compile("^.*/(\\d+)_\\d+$")
     df['img_id'] = df['img'].apply(lambda x: img_id_regex.search(x).group(1))
     return df.groupby("img_id").agg({
         'ad_male' : sum,
