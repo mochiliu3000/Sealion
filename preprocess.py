@@ -12,6 +12,7 @@ from functools import partial
 
 
 thread_num = 6
+COUNTER = 0
 
 
 def extract_coord(train_path, train_dot_path, out_dir, filename):
@@ -194,11 +195,13 @@ def convert_coord(x, y, w_img, h_img, bbox_size):
 
 def splitimage(rownum, colnum, dstpath, src):
     ext = "JPEG"
+    global COUNTER
     img = Image.open(src)
     w, h = img.size
     if rownum <= h and colnum <= w:
         print('Original image info: %sx%s, %s, %s' % (w, h, img.format, img.mode))
-        print('Start spliting image')
+        print('Start spliting image.')
+        # COUNTER += 1
         s = os.path.split(src)
         if dstpath == '':
             dstpath = s[0]
@@ -279,16 +282,21 @@ if __name__ == '__main__':
     label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
     skip_img_path = "./data/MismatchedTrainImages.txt"
 
+    test_path = "./data/Test"
+    test_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split"
+
     # for splitting addon images
     # train_path = "./data/addon_samples/mismatch"
     # train_dotted_path = "./data/addon_samples/mismatchDotted"
     # train_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatch"   # should be absolute path here
     # train_dotted_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatchDotted"  # should be absolute path here
     # label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
-    # skipped_img_ids = ()
+    skipped_img_ids = Set()
 
     # skipped_img_ids = skip_img_set(skip_img_path)
-    split_images(train_path, train_split_dst, skipped_img_ids)
-    split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
+    # split_images(train_path, train_split_dst, skipped_img_ids)
+    # split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
+
+    split_images(test_path, test_split_dst, skipped_img_ids)
 
     # extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)

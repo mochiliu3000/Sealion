@@ -12,6 +12,7 @@ def parse_prediction(log_path, outdir):
 
     df = pd.DataFrame(columns=['img', 'ad_male', 'sub_male', 'juvenile', 'ad_female'])
 
+    counter = 0
     with open(log_path, "r") as log:
         img_path_no_ext = ""
         ad_male_counter, sub_male_counter, juvenile_counter, ad_female_counter = 0, 0, 0, 0
@@ -21,6 +22,7 @@ def parse_prediction(log_path, outdir):
             if search_start:
                 if first_flag:
                     img_path_no_ext = search_start.group(1)
+                    counter += 1
                     print "parsing" + img_path_no_ext + " This is the first image."
                     first_flag = False
                     continue
@@ -29,7 +31,9 @@ def parse_prediction(log_path, outdir):
                 df = df.append({'img': img_path_no_ext, 'ad_male': ad_male_counter, 'sub_male': sub_male_counter, 'juvenile': juvenile_counter,
                                    'ad_female': ad_female_counter}, True)
                 img_path_no_ext = search_start.group(1)
-                print "parsing" + img_path_no_ext + " Result for the last image is saved to df."
+                counter += 1
+                if counter % 500 == 0:
+                    print "parsing" + img_path_no_ext + "No." + str(counter) + " Result for the last image is saved to df."
                 ad_male_counter, sub_male_counter, juvenile_counter, ad_female_counter = 0, 0, 0, 0
                 continue
             kind_line = kind_regex.search(line)
@@ -62,8 +66,10 @@ def sum_prediction(df):
     })
 
 if __name__ == '__main__':
-    result_df = parse_prediction("./prediction_log_example", "./data/prediction")
+    result_df = parse_prediction("/home/sleepywyn/Dev/GitRepo/darknet/sealion_prediction.log", "./data/prediction")
+    result_df.to_csv("./data/prediction/collected_prediction")
     sum_all = sum_prediction(result_df)
+    sum_all.to_scv("./data/prediction/sum_all")
     print sum_all
 
     # In train.csv, col order is: 
@@ -89,3 +95,4 @@ if __name__ == '__main__':
     print(pred)
     sum_all['pups'] = pred
     print(sum_all)
+    sum_all.to_scv("./data/prediction/final_result.csv")
