@@ -8,8 +8,8 @@ import csv
 def parse_prediction(log_path):
     # /Users/ibm/GitRepo/darknet/data/0_8.JPEG: Predicted in 40.548927 seconds.
     start_line_regex = re.compile("^(.*)\.JPEG:\\s+Predicted in ([-+]?[0-9]*\.?[0-9]*) seconds\.\\s+$")
-    # ad_female: 25%
-    kind_regex = re.compile("^(ad_male|sub_male|juvenile|ad_female): [0-9]*%\\s+$")
+    # ad_male: 28%,position: 0.889288 0.877580 0.162597 0.222969
+    kind_regex = re.compile("^(ad_male|sub_male|juvenile|ad_female): [0-9]*%,position: ([-+]?[0-9]*\.?[0-9]*) ([-+]?[0-9]*\.?[0-9]*) ([-+]?[0-9]*\.?[0-9]*) ([-+]?[0-9]*\.?[0-9]*)\\s+$")
 
     df = pd.DataFrame(columns=['img', 'ad_male', 'sub_male', 'juvenile', 'ad_female'])
 
@@ -62,7 +62,7 @@ def parse_prediction_to_csv(log_path, out_path):
     # /Users/ibm/GitRepo/darknet/data/0_8.JPEG: Predicted in 40.548927 seconds.
     start_line_regex = re.compile("^(.*)\.JPEG:\\s+Predicted in ([-+]?[0-9]*\.?[0-9]*) seconds\.\\s+$")
     # ad_female: 25%
-    kind_regex = re.compile("^(ad_male|sub_male|juvenile|ad_female): [0-9]*%\\s+$")
+    kind_regex = re.compile("^(ad_male|sub_male|juvenile|ad_female): [0-9]*%,position: ([-+]?[0-9]*\.?[0-9]*) ([-+]?[0-9]*\.?[0-9]*) ([-+]?[0-9]*\.?[0-9]*) ([-+]?[0-9]*\.?[0-9]*)\\s+$")
     counter = 0
     with open(out_path, "wb") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
@@ -86,7 +86,7 @@ def parse_prediction_to_csv(log_path, out_path):
                     img_path_no_ext = search_start.group(1)
                     counter += 1
                     if counter % 500 == 0:
-                        print "parsing" + img_path_no_ext + "No." + str(counter) + " Result for the last image is saved to df."
+                        print "parsing" + img_path_no_ext + "No." + str(counter) + " Result for the last image is saved to csv."
                     ad_male_counter, sub_male_counter, juvenile_counter, ad_female_counter = 0, 0, 0, 0
                     continue
                 kind_line = kind_regex.search(line)
@@ -122,7 +122,7 @@ def sum_prediction(df):
 if __name__ == '__main__':
 
     # result_df = parse_prediction("/home/sleepywyn/Dev/GitRepo/darknet/sealion_prediction.log")
-    result_df = parse_prediction_to_csv("/Users/ibm/GitRepo/darknet/sealion_prediction.log", "./data/prediction/collected_prediction.csv")
+    parse_prediction_to_csv("/home/sleepywyn/Dev/GitRepo/darknet/sealion_prediction.log", "./data/prediction/collected_prediction.csv")
 
     # result_df.to_csv("./data/prediction/collected_prediction")
     # sum_all = sum_prediction(result_df)

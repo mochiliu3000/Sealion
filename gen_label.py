@@ -2,9 +2,9 @@ import os
 import operator
 import matplotlib.pylab as plt
 
-label_dir = "C:/Users/IBM_ADMIN/Desktop/Machine Learning/seaLion/data/labels"
-image_dir = "C:/Users/IBM_ADMIN/Desktop/Machine Learning/seaLion/data/JPEGImages"
-out_dir = "C:/Users/IBM_ADMIN/Desktop/Machine Learning/seaLion/data"
+label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/labels"
+image_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/JPEGImages"
+out_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data"
 
 def gen_nonzero_label(label_dir, image_dir, out_dir):
 	if not os.path.exists(label_dir):
