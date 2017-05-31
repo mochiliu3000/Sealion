@@ -1,83 +1,43 @@
 Launching: '/Users/ibm/GitRepo/darknet/darknet'
-Working directory: '/Users/ibm/GitRepo/darknet'
-6 arguments:
-argv[0] = '/Users/ibm/GitRepo/darknet/darknet'
-argv[1] = 'detect'
-argv[2] = 'cfg/sealion.data'
-argv[3] = 'cfg/sealion.2.0.cfg'
-argv[4] = 'backup/sealion_600.weights'
-argv[5] = 'data/predict.txt'
-layer     filters    size              input                output
-    0 conv     32  3 x 3 / 1   416 x 416 x   3   ->   416 x 416 x  32
-    1 max          2 x 2 / 2   416 x 416 x  32   ->   208 x 208 x  32
-    2 conv     64  3 x 3 / 1   208 x 208 x  32   ->   208 x 208 x  64
-    3 max          2 x 2 / 2   208 x 208 x  64   ->   104 x 104 x  64
-    4 conv    128  3 x 3 / 1   104 x 104 x  64   ->   104 x 104 x 128
-    5 conv     64  1 x 1 / 1   104 x 104 x 128   ->   104 x 104 x  64
-    6 conv    128  3 x 3 / 1   104 x 104 x  64   ->   104 x 104 x 128
-    7 max          2 x 2 / 2   104 x 104 x 128   ->    52 x  52 x 128
-    8 conv    256  3 x 3 / 1    52 x  52 x 128   ->    52 x  52 x 256
-    9 conv    128  1 x 1 / 1    52 x  52 x 256   ->    52 x  52 x 128
-   10 conv    256  3 x 3 / 1    52 x  52 x 128   ->    52 x  52 x 256
-   11 max          2 x 2 / 2    52 x  52 x 256   ->    26 x  26 x 256
-   12 conv    512  3 x 3 / 1    26 x  26 x 256   ->    26 x  26 x 512
-   13 conv    256  1 x 1 / 1    26 x  26 x 512   ->    26 x  26 x 256
-   14 conv    512  3 x 3 / 1    26 x  26 x 256   ->    26 x  26 x 512
-   15 conv    256  1 x 1 / 1    26 x  26 x 512   ->    26 x  26 x 256
-   16 conv    512  3 x 3 / 1    26 x  26 x 256   ->    26 x  26 x 512
-   17 max          2 x 2 / 2    26 x  26 x 512   ->    13 x  13 x 512
-   18 conv   1024  3 x 3 / 1    13 x  13 x 512   ->    13 x  13 x1024
-   19 conv    512  1 x 1 / 1    13 x  13 x1024   ->    13 x  13 x 512
-   20 conv   1024  3 x 3 / 1    13 x  13 x 512   ->    13 x  13 x1024
-   21 conv    512  1 x 1 / 1    13 x  13 x1024   ->    13 x  13 x 512
-   22 conv   1024  3 x 3 / 1    13 x  13 x 512   ->    13 x  13 x1024
-   23 conv   1024  3 x 3 / 1    13 x  13 x1024   ->    13 x  13 x1024
-   24 conv   1024  3 x 3 / 1    13 x  13 x1024   ->    13 x  13 x1024
-   25 route  16
-   26 reorg              / 2    26 x  26 x 512   ->    13 x  13 x2048
-   27 route  26 24
-   28 conv   1024  3 x 3 / 1    13 x  13 x3072   ->    13 x  13 x1024
-   29 conv     45  1 x 1 / 1    13 x  13 x1024   ->    13 x  13 x  45
-   30 detection
-Loading weights from backup/sealion_600.weights...Done!
-/Users/ibm/GitRepo/darknet/data/0_8.JPEG: Predicted in 43.345528 seconds.
-ad_female: 25%
-ad_female: 27%
-ad_female: 39%
-ad_female: 35%
-ad_female: 41%
-ad_female: 31%
-ad_female: 24%
-ad_female: 25%
-ad_female: 33%
-ad_female: 31%
-ad_female: 30%
-ad_female: 31%
-ad_female: 35%
-ad_female: 42%
-ad_female: 26%
-ad_female: 38%
-ad_female: 30%
-ad_female: 46%
-ad_female: 27%
-ad_female: 46%
-ad_female: 26%
-ad_female: 35%
-ad_female: 39%
-ad_female: 35%
-Not compiled with OpenCV, saving to predictions.png instead
-/Users/ibm/GitRepo/darknet/data/7_88.JPEG: Predicted in 43.374088 seconds.
-ad_female: 27%
-ad_female: 34%
-juvenile: 27%
-juvenile: 28%
-juvenile: 25%
-Not compiled with OpenCV, saving to predictions.png instead
-Cannot load image "classes"
-STB Reason: can't fopen
-Process exited with status 0
-logout
-Saving session...
-...copying shared history...
-...saving history...truncating history files...
-...completed.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/13860_13.JPEG: Predicted in 0.016707 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/13860_90.JPEG: Predicted in 0.016481 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14127_44.JPEG: Predicted in 0.016449 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/13860_99.JPEG: Predicted in 0.018976 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_8.JPEG: Predicted in 0.016461 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_11.JPEG: Predicted in 0.016445 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14127_67.JPEG: Predicted in 0.016437 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_13.JPEG: Predicted in 0.016429 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/17299_1.JPEG: Predicted in 0.016451 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14895_36.JPEG: Predicted in 0.016497 seconds.
+ad_male: 28%,position: 0.889288 0.877580 0.162597 0.222969
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_30.JPEG: Predicted in 0.016431 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/16828_41.JPEG: Predicted in 0.016445 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14127_108.JPEG: Predicted in 0.016434 seconds.
+juvenile: 25%,position: 0.108591 0.232834 0.080734 0.114313
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14127_111.JPEG: Predicted in 0.016454 seconds.
+juvenile: 24%,position: 0.176099 0.322345 0.101871 0.118663
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_42.JPEG: Predicted in 0.016438 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/17299_30.JPEG: Predicted in 0.016480 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/13860_151.JPEG: Predicted in 0.016423 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_56.JPEG: Predicted in 0.016450 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/17299_44.JPEG: Predicted in 0.016485 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/17299_51.JPEG: Predicted in 0.016377 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14127_150.JPEG: Predicted in 0.016461 seconds.
+ad_male: 29%,position: 0.094384 0.852405 0.185569 0.258577
+ad_female: 35%,position: 0.291339 0.856975 0.185605 0.191360
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/13860_177.JPEG: Predicted in 0.016447 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/13860_180.JPEG: Predicted in 0.016442 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14895_129.JPEG: Predicted in 0.016499 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_81.JPEG: Predicted in 0.016421 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/17299_67.JPEG: Predicted in 0.016470 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_82.JPEG: Predicted in 0.016442 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14895_135.JPEG: Predicted in 0.016389 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14895_141.JPEG: Predicted in 0.016436 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/14895_142.JPEG: Predicted in 0.016416 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/15245_94.JPEG: Predicted in 0.016463 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/16828_111.JPEG: Predicted in 0.016535 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/16828_113.JPEG: Predicted in 0.016479 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/17299_91.JPEG: Predicted in 0.016433 seconds.
+/home/sleepywyn/Dev/GitRepo/Sealion/data/Test_split/16828_123.JPEG: Predicted in 0.016452 seconds.
+ad_female: 26%,position: 0.501729 0.229578 0.141306 0.158702
+ad_female: 29%,position: 0.102578 0.234206 0.174797 0.223853

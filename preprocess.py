@@ -279,7 +279,7 @@ if __name__ == '__main__':
     train_dotted_path = "./data/TrainDotted"
     train_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/JPEGImages"   # should be absolute path here
     train_dotted_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/JPEGDottedImages"  # should be absolute path here
-    label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
+    label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/labels"
     skip_img_path = "./data/MismatchedTrainImages.txt"
 
     test_path = "./data/Test"
@@ -291,12 +291,12 @@ if __name__ == '__main__':
     # train_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatch"   # should be absolute path here
     # train_dotted_split_dst = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/JPEGMismatchDotted"  # should be absolute path here
     # label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/addon_samples/labels"
-    skipped_img_ids = Set()
+    # skipped_img_ids = Set()
 
     # skipped_img_ids = skip_img_set(skip_img_path)
     # split_images(train_path, train_split_dst, skipped_img_ids)
     # split_images(train_dotted_path, train_dotted_split_dst, skipped_img_ids)
 
-    split_images(test_path, test_split_dst, skipped_img_ids)
+    # split_images(test_path, test_split_dst, skipped_img_ids)
 
-    # extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)
+    extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)
