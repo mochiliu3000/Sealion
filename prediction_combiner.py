@@ -122,34 +122,38 @@ def sum_prediction(df):
 if __name__ == '__main__':
 
     # result_df = parse_prediction("/home/sleepywyn/Dev/GitRepo/darknet/sealion_prediction.log")
-    result_df = parse_prediction_to_csv("/Users/ibm/GitRepo/darknet/sealion_prediction.log", "./data/prediction/collected_prediction.csv")
+    # result_df = parse_prediction_to_csv("/Users/ibm/GitRepo/darknet/sealion_prediction.log", "./data/prediction/collected_prediction.csv")
 
     # result_df.to_csv("./data/prediction/collected_prediction")
     # sum_all = sum_prediction(result_df)
     # sum_all.to_scv("./data/prediction/sum_all")
     # print sum_all
-    #
-    # # In train.csv, col order is:
-    # # adult_males, subadult_males, adult_females, juveniles, pups
-    # # While sum_all is in this order:
-    # # juvenile, sub_male, ad_male, ad_female
-    # cols = sum_all.columns.tolist()
-    # cols = [cols[2], cols[1], cols[3], cols[0]]
-    # sum_new = sum_all[cols]
-    # sum_array = sum_new.values
-    #
-    # # Use train.csv to train and validate XGB regressor
-    # data = np.genfromtxt('./train.csv', delimiter=',', skip_header=1, usecols=(1, 2, 3, 4, 5))
-    # X = data[:, :4]
-    # Y = data[:, 4]
-    #
-    # # predict on sum_array
-    # f_names = ['adult males', 'subadult males', 'adult females', 'juveniles']
-    # RMSE, f_imp, pred = pup_pred.train_pred(n_sims = 1, X = X, Y = Y, f_names = f_names, test_size = 0.2, pred_data = sum_array)
-    #
-    # # print model RMSE and pred
-    # print('RMSE = ', np.around(np.mean(RMSE), 1), '+/-', np.around(np.std(RMSE), 1))
-    # print(pred)
-    # sum_all['pups'] = pred
-    # print(sum_all)
-    # sum_all.to_scv("./data/prediction/final_result.csv")
+	
+    #############################################################################################
+	
+    sum_all = pd.read_csv("C:/Users/IBM_ADMIN/Desktop/Machine Learning/seaLion/sum_all.csv")
+    # In train.csv, col order is:
+    # train_id, adult_males, subadult_males, adult_females, juveniles, pups
+    # While sum_all is in this order:
+    # img_id, juvenile, sub_male, ad_male, ad_female
+    cols = sum_all.columns.tolist()
+    cols = [cols[3], cols[2], cols[4], cols[1]]
+    sum_new = sum_all[cols]
+    sum_array = sum_new.values
+    
+    # Use train.csv to train and validate XGB regressor
+    data = np.genfromtxt('./train.csv', delimiter=',', skip_header=1, usecols=(1, 2, 3, 4, 5))
+    X = data[:, :4]
+    Y = data[:, 4]
+
+    # predict on sum_array
+    f_names = ['adult males', 'subadult males', 'adult females', 'juveniles']
+    RMSE, f_imp, pred = pup_pred.train_pred(n_sims = 1, X = X, Y = Y, f_names = f_names, test_size = 0.3, pred_data = sum_array)
+
+    # print model RMSE and pred
+    print('RMSE = ', np.around(np.mean(RMSE), 1), '+/-', np.around(np.std(RMSE), 1))
+    print(pred)
+    pred = [max(round(v), 0) for v in pred] # some predict value is negative
+    sum_all['pups'] = pred
+    print(sum_all)
+    sum_all.to_csv("./data/prediction/final_pred.csv")
