@@ -1,4 +1,5 @@
 import os
+from shutil import copyfile
 import operator
 import matplotlib.pylab as plt
 import collections
@@ -6,7 +7,8 @@ import numpy as np
 
 label_dir = "/home/hao/Desktop/sealion_training_data/labels"
 image_dir = "/home/hao/Desktop/sealion_training_data/Train_split"
-out_dir = "/home/hao/Desktop/sealion_training_data"
+dot_image_dir = "/home/hao/Desktop/sealion_training_data/TrainDotted_split"
+out_dir = "/home/hao/Desktop/sealion_training_data/out"
 
 
 def gen_nonzero_label(label_dir, image_dir, out_dir):
@@ -45,7 +47,7 @@ def gen_less_female_nonzero_label(label_dir, image_dir, out_dir, threshold, hist
                 tr_file.write(image_dir + "/" + label_file[:-3] + "JPEG\n")
 
 
-def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.003, no_sealion_perc = 0.1):
+def gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir, valid_perc = 0.003, no_sealion_perc = 0.1):
     if not os.path.exists(label_dir) or not os.path.exists(image_dir):
         print("ERROR: Label or Image folder you provided does not exist. Exit.")
     else:
@@ -131,13 +133,34 @@ def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.003, no_s
 
         print("INFO: Finally ...... generated a validation set of size ", len(result_set))
 
+        # Copy the Train small picture to a separate folder --- out_dir/Valid
+        print("INFO: Copy the validation small pictures to ", out_dir, "/Valid")
+        if not os.path.exists("%s/Valid" % out_dir):
+            os.makedirs("%s/Valid" % out_dir)
 
-        # Copy the Train small picture to a separate folder
-        # Copy the TrainDotted small picture to a separate folder
-        # Write label txt file of result_set which points to this new created folder
+        # Copy the TrainDotted small picture to a separate folder --- out_dir/ValidDotted
+        print("INFO: Copy the Dotted validation small pictures to ", out_dir, "/ValidDotted")
+        if not os.path.exists("%s/ValidDotted" % out_dir):
+            os.makedirs("%s/ValidDotted" % out_dir)
+
+        # Copy corresponding labels to a separate folder --- out_dir/labels
+        print("INFO: Copy the validation small picture labels to ", out_dir, "/labels")
+        if not os.path.exists("%s/labels" % out_dir):
+            os.makedirs("%s/labels" % out_dir)
+
+        with open(out_dir+"/valid_sealion.txt", "wb") as f:
+            for item in result_set:
+                copyfile(image_dir+"/"+item[:-4]+".JPEG", out_dir+"/Valid/"+item[:-4]+".JPEG")
+                copyfile(label_dir+"/"+item, out_dir+"/labels/"+item)
+                copyfile(dot_image_dir+"/"+item[:-4]+".JPEG", out_dir+"/ValidDotted/"+item[:-4]+".JPEG")
+                f.write(out_dir+"/Valid/"+item[:-4]+".JPEG\n")
+            
+
+        # Write label txt file of result_set which points to this new created folder --- out_dir/valid_sealion.txt
+        print("INFO: Generate the validation label txt to ", out_dir, "/valid_sealion.txt")
+
         # Return the pwd of this txt file
-
-        return result_set
+        return "%s/valid_sealion.txt" % out_dir
 
 def trigger_validation():
     # Get darknet weight folder
@@ -160,4 +183,4 @@ if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
     # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.3, True)
-    gen_validation_label()
+    gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
