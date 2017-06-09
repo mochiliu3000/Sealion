@@ -97,10 +97,10 @@ def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.003, no_s
             key_list.append(pic_type[int(key.split("_")[0])])  # key is like "44_3.txt" => 44 => a number in [0, 1, 2, 3, 4]
             val_list.append(value)  # value is like [1, 4, 3, 7]
 
-        count_arr = np.array(key_list)
+        count_arr = np.array(val_list)
         mid_arr = np.median(count_arr, axis=0)  # calculate median value for each column (1 * 4)
         bool_arr = count_arr > mid_arr  # get a bool arr like [[T, F, F, T], [F, F, T, T], ...]
-        val_arr = np.array(val_list)
+        val_arr = np.array(key_list)
         key_arr = np.array(full_key_list)
         result_set = set()
 
