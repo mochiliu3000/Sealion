@@ -137,10 +137,10 @@ def gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir, valid_per
 
         print("INFO: Finally ...... generated a validation set of size ", len(result_set))
 
-        # Copy the Train small picture to a separate folder --- out_dir/Valid
-        print("INFO: Copy the validation small pictures to ", out_dir, "/Valid")
-        if not os.path.exists("%s/Valid" % out_dir):
-            os.makedirs("%s/Valid" % out_dir)
+        # Copy the Train small picture to a separate folder --- out_dir/JPEGImages
+        print("INFO: Copy the validation small pictures to ", out_dir, "/JPEGImages")
+        if not os.path.exists("%s/JPEGImages" % out_dir):
+            os.makedirs("%s/JPEGImages" % out_dir)
 
         # Copy the TrainDotted small picture to a separate folder --- out_dir/ValidDotted
         print("INFO: Copy the Dotted validation small pictures to ", out_dir, "/ValidDotted")
@@ -154,10 +154,10 @@ def gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir, valid_per
 
         with open(out_dir+"/valid_sealion.txt", "wb") as f:
             for item in result_set:
-                copyfile(image_dir+"/"+item[:-4]+".JPEG", out_dir+"/Valid/"+item[:-4]+".JPEG")
+                copyfile(image_dir+"/"+item[:-4]+".JPEG", out_dir+"/JPEGImages/"+item[:-4]+".JPEG")
                 copyfile(label_dir+"/"+item, out_dir+"/labels/"+item)
                 copyfile(dot_image_dir+"/"+item[:-4]+".JPEG", out_dir+"/ValidDotted/"+item[:-4]+".JPEG")
-                f.write(out_dir+"/Valid/"+item[:-4]+".JPEG\n")
+                f.write(out_dir+"/JPEGImages/"+item[:-4]+".JPEG\n")
             
 
         # Write label txt file of result_set which points to this new created folder --- out_dir/valid_sealion.txt
