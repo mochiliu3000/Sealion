@@ -4,9 +4,9 @@ import matplotlib.pylab as plt
 import collections
 import numpy as np
 
-label_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/labels"
-image_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/JPEGImages"
-out_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data"
+label_dir = "/home/hao/Desktop/sealion_training_data/labels"
+image_dir = "/home/hao/Desktop/sealion_training_data/Train_split"
+out_dir = "/home/hao/Desktop/sealion_training_data"
 
 
 def gen_nonzero_label(label_dir, image_dir, out_dir):
@@ -45,12 +45,12 @@ def gen_less_female_nonzero_label(label_dir, image_dir, out_dir, threshold, hist
                 tr_file.write(image_dir + "/" + label_file[:-3] + "JPEG\n")
 
 
-def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.02, no_sealion_perc = 0.1):
+def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.003, no_sealion_perc = 0.1):
     if not os.path.exists(label_dir) or not os.path.exists(image_dir):
         print("ERROR: Label or Image folder you provided does not exist. Exit.")
     else:
         # Note: Each big picture has a type, for example, solid, stone, sea, wood ...
-        pic_type = []   # length = 948
+        pic_type = ([0, 1, 2, 3, 4] * 190)[:-2]   # length = 948
         type_dict = {}  # {solid: 0, stone: 1, grass: 2, sea: 3, animal&other: 4}
         pic_tc = collections.Counter(pic_type)
         print("INFO: Picture types and corresponding counts are ", pic_tc)
@@ -62,9 +62,9 @@ def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.02, no_se
         for label_file in os.listdir(label_dir):
             num_lines = sum(1 for line in open(label_dir + "/" + label_file))
             if num_lines > 0:
-                # collections.Counter generate dictionary like this: {0:2, 1:2, 2:0, 3:4}, sort it by key and fetch value
-                labels_count = collections.Counter([line.split()[0] for line in open(label_dir + "/" + label_file)])
-                sorted_count = sorted(labels_count.values(), key=operator.itemgetter(0))
+                box_labels = np.array([line.split()[0] for line in open(label_dir + "/" + label_file)])
+                sorted_count = [np.sum(box_labels == '0'), np.sum(box_labels == '1'),
+                                np.sum(box_labels == '2'), np.sum(box_labels == '3')]
                 count_dict[label_file] = sorted_count  # adult_males, subadult_males, juveniles, adult_females
             else:
                 no_sealion_pic_list.append(label_file)
@@ -79,8 +79,8 @@ def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.02, no_se
         # Hence for each kind of pic_type, each kind of sealion count threshold class, at 1 validation small picture will be selected
         # The sealion count threshold class here can be (small_number, large_number)
         # Hence in all we get: 2*2*2*2*5 possible combinations for pic with at least 1 sealion; and for no sealion pic, 5 possible pic_type
-        pic_num_each_comb = seaslion_size / (2*2*2*2*5) + 1
-        pic_num_each_pic_type = no_sealion_size / 5 + 1
+        pic_num_each_comb = int(seaslion_size / (2*2*2*2*5)) + 1
+        pic_num_each_pic_type = int(no_sealion_size / 5) + 1
         print("INFO: Searching small pictures with at least 1 sealion, for each combination,  ", pic_num_each_comb,
               " pictures will be randomly fetched...")
         print("INFO: Also Searching small pictures with 0 sealion, for each pic_type,  ", pic_num_each_pic_type,
@@ -88,13 +88,16 @@ def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.02, no_se
         print("INFO: In all, plan to generate a validation set of size ", (pic_num_each_comb * (2*2*2*2*5) + pic_num_each_pic_type * 5),
               ", ", (pic_num_each_pic_type * 5), " of them has 0 sealions.")
 
-        full_key_list = key_list = val_list = []
-        for key, value in count_dict.items():
+        full_key_list = []; key_list = []; val_list = []
+        for key, value in count_dict.iteritems():
+            if key == "all.txt":
+                print("WARN: Find 'all.txt' in folder ", label_dir, " . Skip it...")
+                continue
             full_key_list.append(key)  # store full key for later use
-            key_list.append(pic_type[key.split("_")[0]])  # key is like "44_3" => 44 => a number in [0, 1, 2, 3, 4]
+            key_list.append(pic_type[int(key.split("_")[0])])  # key is like "44_3.txt" => 44 => a number in [0, 1, 2, 3, 4]
             val_list.append(value)  # value is like [1, 4, 3, 7]
 
-        count_arr = np.array(value)
+        count_arr = np.array(key_list)
         mid_arr = np.median(count_arr, axis=0)  # calculate median value for each column (1 * 4)
         bool_arr = count_arr > mid_arr  # get a bool arr like [[T, F, F, T], [F, F, T, T], ...]
         val_arr = np.array(val_list)
@@ -103,24 +106,47 @@ def gen_validation_label(label_dir, image_dir, out_dir, valid_perc = 0.02, no_se
 
         for i in range(5):
             for j in range(16):
-                bool_select = np.array([c == '1' for c in bin(j)[2:]])  # [T, F, F, T]
+                b_value = bin(j)[2:]
+                b_value = '0' * (4 - len(b_value)) + b_value
+                bool_select = np.array([c == '1' for c in b_value])  # [T, F, F, T]
                 typed_bool_arr = bool_arr[val_arr == i]
-                ok_count = np.sum([(e == bool_select).all() for e in typed_bool_arr])
+                ok_ind = [(e == bool_select).all() for e in typed_bool_arr]
+                ok_count = np.sum(ok_ind)
                 if ok_count == 0:
                     print("WARN: No small picture match the requirement: pic_type=", i, " and bool_select=", bool_select)
                     continue
                 elif ok_count < pic_num_each_comb:
                     print("WARN: Only find ", ok_count, " small pictures match the requirement (Need ", pic_num_each_comb,
                           " pictures): pic_type=", i, " and bool_select=", bool_select)
+                    ok_labels = (key_arr[val_arr == i])[ok_ind]
                 else:
                     print("INFO: Find ", ok_count, " small pictures match the requirement: pic_type=", i,
                           " and bool_select=", bool_select)
-                ok = [(e == bool_select).all() for e in typed_bool_arr]
-                ok_labels = (key_arr[val_arr == i])[ok]
-                result_set.add(ok_labels)
+                    print("INFO: Randomly select ", pic_num_each_comb, " of them...")
+                    perm = np.random.permutation(ok_count)
+                    ind_perm = perm[:pic_num_each_comb]
+                    ok_labels = (key_arr[val_arr == i])[ok_ind][ind_perm]
+
+                result_set = result_set.union(ok_labels.tolist())
 
         print("INFO: Finally ...... generated a validation set of size ", len(result_set))
+
+
+        # Copy the Train small picture to a separate folder
+        # Copy the TrainDotted small picture to a separate folder
+        # Write label txt file of result_set which points to this new created folder
+        # Return the pwd of this txt file
+
         return result_set
+
+def trigger_validation():
+    # Get darknet weight folder
+    # Get validation label txt and output folder
+    # Change config file of darknet
+    # For each weight, call ./darknet detector validation
+    # Parse the log of validation and compare it with true value
+    # Draw plots for all weights comparision, write out table /graph
+    return
 
 
 
@@ -133,4 +159,5 @@ def batch_rename(path):
 if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
-    gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.3, True)
+    # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.3, True)
+    gen_validation_label()
