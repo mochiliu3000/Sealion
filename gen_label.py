@@ -8,8 +8,12 @@ import numpy as np
 label_dir = "/home/hao/Desktop/sealion_training_data/labels"
 image_dir = "/home/hao/Desktop/sealion_training_data/Train_split"
 dot_image_dir = "/home/hao/Desktop/sealion_training_data/TrainDotted_split"
-out_dir = "/home/hao/Desktop/sealion_training_data/out"
+out_dir = "/home/hao/Desktop/sealion_training_data/out" # user defined to store validation images and labels
 
+weight_dir = "/home/hao/Desktop/sealion_training_data/round4_weight"
+darknet_dir = "/home/hao/darknet"
+valid_txt_dir = out_dir + "/valid_sealion.txt"
+valid_pred_dir = "/home/hao/Desktop/sealion_training_data/Valid_pred" # user defined to store validation predictions
 
 def gen_nonzero_label(label_dir, image_dir, out_dir):
     if not os.path.exists(label_dir):
@@ -48,7 +52,7 @@ def gen_less_female_nonzero_label(label_dir, image_dir, out_dir, threshold, hist
 
 
 def gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir, valid_perc = 0.003, no_sealion_perc = 0.1):
-    if not os.path.exists(label_dir) or not os.path.exists(image_dir):
+    if not os.path.exists(label_dir) or not os.path.exists(image_dir) or not os.path.exists(dot_image_dir):
         print("ERROR: Label or Image folder you provided does not exist. Exit.")
     else:
         # Note: Each big picture has a type, for example, solid, stone, sea, wood ...
@@ -162,11 +166,38 @@ def gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir, valid_per
         # Return the pwd of this txt file
         return "%s/valid_sealion.txt" % out_dir
 
-def trigger_validation():
-    # Get darknet weight folder
-    # Get validation label txt and output folder
+def trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir):
+    if not os.path.exists(darknet_dir) or not os.path.exists(weight_dir) or not os.path.exists(valid_txt_dir):
+        print("ERROR: darknet or weight folder you provided does not exist. Exit.")
+    if not os.path.exists(valid_pred_dir):
+        os.makedirs(valid_pred_dir)
+
     # Change config file of darknet
-    # For each weight, call ./darknet detector validation
+    cfg_name_file = darknet_dir + "/cfg/sealion.names"
+    cfg_valid_file = darknet_dir + "/cfg/sealion_valid.data"
+    cfg_cfg_file = darknet_dir + "/cfg/sealion.2.0.cfg"
+    with open(cfg_valid_file, 'wb') as v_f:
+        v_f.write("classes = 4\n")
+        v_f.write("train = %s\n" % valid_txt_dir)
+        v_f.write("names = %s\n" % cfg_name_file)
+        v_f.write("valid = %s\n" % valid_txt_dir)
+        v_f.write("backup = backup")
+    if not os.path.exists(cfg_name_file):
+        with open(cfg_name_file, 'wb') as n_f:
+            n_f.write("ad_male\nsub_male\njuvenile\nad_female")
+        print("INFO: Generated ", cfg_name_file)
+    print("INFO: Generated ", cfg_valid_file)
+
+    # For each weight, call ./darknet detector validsealion cfg/sealion.data cfg/sealion.2.0.cfg weight_dir/sealion_800.weights -out valid_pred_dir
+    for w in os.listdir(weight_dir):
+        print("INFO: Run validation prediction on weight file ", w)
+        w_out_dir = "%s/%s" % (valid_pred_dir, w.split('.')[0])
+        w_file = "%s/%s" % (weight_dir, w)
+        if not os.path.exists(w_out_dir):
+            os.makedirs(w_out_dir)
+        cmd = "cd %s && ./darknet detector validsealion %s %s %s -out %s >> %s.valid.log" % (darknet_dir, cfg_valid_file, cfg_cfg_file, w_file, w_out_dir, w)
+        print("INFO: Run command --- %s" % cmd)
+        os.system(cmd)
     # Parse the log of validation and compare it with true value
     # Draw plots for all weights comparision, write out table /graph
     return
@@ -183,4 +214,5 @@ if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
     # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.3, True)
-    gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
+    # gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
+    trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir)
