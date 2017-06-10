@@ -51,4 +51,4 @@ def batch_rename(path):
 if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
-    gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.3, True)
+    gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.05, True)
