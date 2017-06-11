@@ -6,9 +6,12 @@ from keras.layers.core import Dropout
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras import backend as K
-from keras.layers import Input, Dense
+from keras.layers import Input, Flatten, Dense
 from keras.models import Model
 from keras.optimizers import Adam
+
+img_size = 512
+
 
 """
 generate sea lion images with given yolo format.
@@ -40,7 +43,29 @@ def sealion_gen(path_file):
         for pair in pairs:
             yield pair
 
+def sealion_cnn():
+    inputs = Input((1, 512, 512))
+    conv1 = Conv2D(64, (3, 3), activation='relu', padding='same', data_format='channels_first')(inputs)
+    conv1 = Dropout(0.2)(conv1)
+    pool1 = MaxPooling2D(pool_size=(2, 2), data_format='channels_first')(conv1)
 
+    conv2 = Conv2D(128, (3, 3), activation='relu', padding='same', data_format='channels_first')(pool1)
+    conv2 = Dropout(0.2)(conv2)
+    pool2 = MaxPooling2D(pool_size=(2, 2), data_format='channels_first')(conv2)
+
+    flatten = Flatten()(pool2)
+    dense1 = Dense(512, activation='relu')(flatten)
+    dense2 = Dense(4, activation='softmax')(dense1)
+
+    model = Model(input=inputs, output=dense2)
+    model.summary()
+    model.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
+
+    return model
+
+def load_model(path, model):
+    model.load_weights(path)
+    return model
 
 ############################
 ##          Main          ##
