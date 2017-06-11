@@ -13,6 +13,7 @@ out_dir = "/home/hao/Desktop/sealion_training_data/out" # user defined to store 
 weight_dir = "/home/hao/Desktop/sealion_training_data/round4_weight"
 darknet_dir = "/home/hao/darknet"
 valid_txt_dir = out_dir + "/valid_sealion.txt"
+neg_img_dir = "/home/hao/Desktop/sealion_training_data/negative_split" # put images under neg_img_dir/JPEGImages, labels under neg_img_dir/labels
 valid_pred_dir = "/home/hao/Desktop/sealion_training_data/Valid_pred" # user defined to store validation predictions
 
 def gen_nonzero_label(label_dir, image_dir, out_dir):
@@ -195,7 +196,7 @@ def trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir):
         w_file = "%s/%s" % (weight_dir, w)
         if not os.path.exists(w_out_dir):
             os.makedirs(w_out_dir)
-        cmd = "cd %s && ./darknet detector validsealion %s %s %s -out %s >> %s.valid.log" % (darknet_dir, cfg_valid_file, cfg_cfg_file, w_file, w_out_dir, w)
+        cmd = "cd %s && ./darknet detector validsealion %s %s %s -out %s" % (darknet_dir, cfg_valid_file, cfg_cfg_file, w_file, w_out_dir)
         print("INFO: Run command --- %s" % cmd)
         os.system(cmd)
     # Parse the log of validation and compare it with true value
@@ -209,11 +210,31 @@ def batch_rename(path):
         os.rename(path + "/" + file_name, path + "/" + file_name[:-3] + "JPEG")
 
 
+def gen_neg_label(neg_img_dir, valid_txt_dir):
+    img_dir = "%s/JPEGImages" % neg_img_dir
+    label_dir = "%s/labels" % neg_img_dir
+    if not os.path.exists(label_dir):
+        os.makedirs(label_dir)
+    if valid_txt_dir != "":
+        print("INFO: Will write negative image paths into validation txt...")
+        with open(valid_txt_dir, 'a') as v_f:
+            for img_name in os.listdir(img_dir):
+                with open(label_dir + "/" + img_name[:-4] + "txt", 'wb') as f:
+                    f.write("")
+                v_f.write("%s/%s\n" % (img_dir, img_name))
+    else:
+        print("WARN: Will not write validation txt file since you did not provide it.")
+        for img_name in os.listdir(img_dir):
+            with open(label_dir + "/" + img_name[:-4] + "txt", 'wb') as f:
+                f.write("")
+
+        
 
 if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
-    gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.05, True)
+    # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.05, True)
     # gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
+    # gen_neg_label(neg_img_dir, valid_txt_dir)
     trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir)
     
