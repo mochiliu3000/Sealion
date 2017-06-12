@@ -9,6 +9,7 @@ from keras import backend as K
 from keras.layers import Input, Flatten, Dense
 from keras.models import Model
 from keras.optimizers import Adam
+from keras import applications
 
 img_size_width = 64
 img_size_height = 64
@@ -46,6 +47,9 @@ def sealion_gen(path_file, resize):
         for pair in pairs:
             yield pair
 
+"""
+This is only a template
+"""
 def sealion_cnn():
     inputs = Input((1, 64, 64))
     conv1 = Conv2D(64, (3, 3), activation='relu', padding='same', data_format='channels_first')(inputs)
@@ -66,6 +70,51 @@ def sealion_cnn():
 
     return model
 
+
+def sealion_vgg16(classes=5):
+    img_input = Input((1, img_size_height, img_size_width))
+    # Block 1
+    x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv1')(img_input)
+    x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv2')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
+
+    # Block 2
+    x = Conv2D(128, (3, 3), activation='relu', padding='same', name='block2_conv1')(x)
+    x = Conv2D(128, (3, 3), activation='relu', padding='same', name='block2_conv2')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
+
+    # Block 3
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', name='block3_conv1')(x)
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', name='block3_conv2')(x)
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', name='block3_conv3')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool')(x)
+
+    # # Block 4
+    # x = Conv2D(512, (3, 3), activation='relu', padding='same', name='block4_conv1')(x)
+    # x = Conv2D(512, (3, 3), activation='relu', padding='same', name='block4_conv2')(x)
+    # x = Conv2D(512, (3, 3), activation='relu', padding='same', name='block4_conv3')(x)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool')(x)
+    #
+    # # Block 5
+    # x = Conv2D(512, (3, 3), activation='relu', padding='same', name='block5_conv1')(x)
+    # x = Conv2D(512, (3, 3), activation='relu', padding='same', name='block5_conv2')(x)
+    # x = Conv2D(512, (3, 3), activation='relu', padding='same', name='block5_conv3')(x)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool')(x)
+
+    x = Flatten(name='flatten')(x)
+    x = Dense(1024, activation='relu', name='fc1')(x)
+    x = Dense(1024, activation='relu', name='fc2')(x)
+    x = Dense(classes, activation='softmax', name='predictions')(x)
+
+    model = Model(img_input, x, name='vgg16')
+    return model
+
+
+def train_vgg16(train_generator, steps_per_epoch, validation_data=None):
+    model = applications.VGG16(include_top=True, weights='imagenet', classes=5)
+    model.fit_generator(generator=train_generator, steps_per_epoch=1, epochs=400, validation_data=None)
+
+
 def load_model(path, model):
     model.load_weights(path)
     return model
@@ -77,6 +126,11 @@ if __name__ == '__main__':
     train_path = "/home/sleepywyn/Dev/GitRepo/Sealion/data/validate.txt"
     train_gen = sealion_gen(train_path, resize=True)
     img, label = train_gen.next()
-    print img.size
-    print label
-    img.save('./sample.JPEG', 'JPEG')
+    # print img.size  #code for testing generator
+    # print label
+    # img.save('./sample.JPEG', 'JPEG')
+
+    model = sealion_vgg16(5)
+    model.fit_generator(generator=train_gen, steps_per_epoch=1, epochs=6, validation_data=None)
+
+
