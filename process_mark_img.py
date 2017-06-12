@@ -2,10 +2,12 @@ from skimage import io, transform
 import os
 import numpy as np
 
-in_dir = "C:/Users/IBM_ADMIN/Desktop/newpic"
-out_dir = "C:/Users/IBM_ADMIN/Desktop/pic"
-degrees = [90, 180, 270]
-flips = ["h", "v"]
+in_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/negative_split"
+out_dir = "/home/sleepywyn/Dev/GitRepo/Sealion/data/negative_split"
+# degrees = [90, 180, 270]
+# flips = ["h", "v"]
+degrees = [90]
+flips = ["h"]
 
 ############
 ## rotate ##

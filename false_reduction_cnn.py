@@ -58,7 +58,7 @@ def sealion_cnn():
 
     flatten = Flatten()(pool2)
     dense1 = Dense(512, activation='relu')(flatten)
-    dense2 = Dense(4, activation='softmax')(dense1)
+    dense2 = Dense(5, activation='softmax')(dense1)
 
     model = Model(input=inputs, output=dense2)
     model.summary()
