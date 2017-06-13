@@ -27,6 +27,16 @@ def gen_nonzero_label(label_dir, image_dir, out_dir):
                 if num_lines > 0:
                     tr_file.write(image_dir + "/" + label_file[:-3] + "JPEG\n")
 
+def gen_empty_label(image_dir, label_dir):
+    img_list = os.listdir(image_dir)
+    if not img_list:
+        print("ERROR: The image folder you provided does not exists. Exit.")
+    else:
+        for img_name in img_list:
+            label_path = label_dir + "/" + img_name[:-4] + "txt"
+            with open(label_path, "wb") as tr_file:
+                print "generating empty label for file: " + img_name
+
 
 def gen_less_female_nonzero_label(label_dir, image_dir, out_dir, threshold, hist=False):
     if not os.path.exists(label_dir) or not os.path.exists(image_dir):
@@ -240,8 +250,11 @@ if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
     # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.05, True)
+    # gen_empty_label("./data/negative_split", "/home/sleepywyn/Dev/GitRepo/Sealion/data/negative_split")
+
     numbers = re.compile(r'(\d+)')
     gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
     gen_neg_label(neg_img_dir, valid_txt_dir)
+    
     # trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir)
     
