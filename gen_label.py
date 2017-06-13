@@ -1,4 +1,5 @@
 import os
+import re
 from shutil import copyfile
 import operator
 import matplotlib.pylab as plt
@@ -10,7 +11,7 @@ image_dir = "/home/hao/Desktop/sealion_training_data/Train_split"
 dot_image_dir = "/home/hao/Desktop/sealion_training_data/TrainDotted_split"
 out_dir = "/home/hao/Desktop/sealion_training_data/out" # user defined to store validation images and labels
 
-weight_dir = "/home/hao/Desktop/sealion_training_data/round4_weight"
+weight_dir = "/home/hao/Desktop/sealion_training_data/round5_weight"
 darknet_dir = "/home/hao/darknet"
 valid_txt_dir = out_dir + "/valid_sealion.txt"
 neg_img_dir = "/home/hao/Desktop/sealion_training_data/negative_split" # put images under neg_img_dir/JPEGImages, labels under neg_img_dir/labels
@@ -154,7 +155,7 @@ def gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir, valid_per
             os.makedirs("%s/labels" % out_dir)
 
         with open(out_dir+"/valid_sealion.txt", "wb") as f:
-            for item in result_set:
+            for item in sorted(list(result_set), key=numericalSort):  #  Need to sort result set
                 copyfile(image_dir+"/"+item[:-4]+".JPEG", out_dir+"/JPEGImages/"+item[:-4]+".JPEG")
                 copyfile(label_dir+"/"+item, out_dir+"/labels/"+item)
                 copyfile(dot_image_dir+"/"+item[:-4]+".JPEG", out_dir+"/ValidDotted/"+item[:-4]+".JPEG")
@@ -204,6 +205,11 @@ def trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir):
     return
 
 
+def numericalSort(value):
+    parts = numbers.split(value)
+    parts[1::2] = map(int, parts[1::2])
+    return parts
+
 
 def batch_rename(path):
     for file_name in os.listdir(path):
@@ -216,14 +222,14 @@ def gen_neg_label(neg_img_dir, valid_txt_dir):
     if not os.path.exists(label_dir):
         os.makedirs(label_dir)
     if valid_txt_dir != "":
-        print("INFO: Will write negative image paths into validation txt...")
+        print("INFO: Write negative image paths into validation txt...")
         with open(valid_txt_dir, 'a') as v_f:
-            for img_name in os.listdir(img_dir):
+            for img_name in sorted(os.listdir(img_dir), key=numericalSort):  # sort listdir hence the pred result are in the same order
                 with open(label_dir + "/" + img_name[:-4] + "txt", 'wb') as f:
                     f.write("")
                 v_f.write("%s/%s\n" % (img_dir, img_name))
     else:
-        print("WARN: Will not write validation txt file since you did not provide it.")
+        print("WARN: Not write validation txt file since you did not provide it.")
         for img_name in os.listdir(img_dir):
             with open(label_dir + "/" + img_name[:-4] + "txt", 'wb') as f:
                 f.write("")
@@ -234,7 +240,8 @@ if __name__ == '__main__':
     # gen_nonzero_label(label_dir, image_dir, out_dir)
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
     # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.05, True)
-    # gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
-    # gen_neg_label(neg_img_dir, valid_txt_dir)
-    trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir)
+    numbers = re.compile(r'(\d+)')
+    gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
+    gen_neg_label(neg_img_dir, valid_txt_dir)
+    # trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir)
     
