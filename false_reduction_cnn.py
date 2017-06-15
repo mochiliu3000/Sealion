@@ -11,10 +11,12 @@ from keras.models import Model
 from keras.optimizers import Adam
 from keras import applications
 from sklearn.preprocessing import LabelBinarizer
+from collections import deque
 
 img_size_width = 64
 img_size_height = 64
 resize_algorithm = Image.BILINEAR
+gen_pool_thresh = 8
 
 """
 generate sea lion images with given yolo format.
@@ -23,12 +25,14 @@ labels should be in the folder: labels
 """
 def sealion_gen(path_file, resize):
     ## end symbol is included in the line
-    img_path_list = [line[:-1] for line in open(path_file)]
+
+    img_path_list = open(path_file).read().splitlines()
+    # img_path_list = [line[:-1] for line in open(path_file)]
     shuffle(img_path_list)
     label_path_list = [(img_path[:-4].replace("JPEGImages", "labels") + "txt") for img_path in img_path_list]
 
+    pair_pool = deque([])
     for index, img_path in enumerate(img_path_list):
-        pairs = []
         label_path = label_path_list[index]
         origin = Image.open(img_path)
         origin_w, origin_h = origin.size
@@ -44,12 +48,21 @@ def sealion_gen(path_file, resize):
             img = origin.crop(box)
             if resize:
                 img = img.resize((img_size_width, img_size_height), resize_algorithm)
-            pairs.append((img, kind))
+            pair_pool.append((img, kind))
+
         # encoder = LabelBinarizer()
-        for (input, target) in pairs:
-            # encoder.fit(target)
-            # target_one_hot = encoder.transform(target).asType(float)
-            yield (np.expand_dims(np.transpose(input, (2, 0, 1)), axis=0), np.expand_dims(one_hot(target), axis=0))
+
+        if len(pair_pool) >= gen_pool_thresh:
+            tmp_x = []
+            tmp_y = []
+            counter = 0
+            while counter < gen_pool_thresh:
+                input, target = pair_pool.popleft()
+                tmp_x.append(np.transpose(input, (2, 0, 1)))
+                tmp_y.append(one_hot(target))
+                counter += 1
+            yield (np.array(tmp_x), np.array(tmp_y))
+
 
 def one_hot(x):
     one_hot_array = np.array([0., 0., 0., 0., 0.])
@@ -134,14 +147,18 @@ def load_model(path, model):
 ##          Main          ##
 ############################
 if __name__ == '__main__':
-    train_path = "/home/sleepywyn/Dev/GitRepo/Sealion/data/validate.txt"
+    train_path = "/Users/ibm/GitRepo/Sealion/data/train.txt"
     train_gen = sealion_gen(train_path, resize=True)
-    # img, label = train_gen.next()
-    # print img.size  #code for testing generator
+    # batch = train_gen.next()
+    # batch2 = train_gen.next()
+    print "gen fininsh"
+
+    # print len(batch)  #code for testing generator
+
     # print label
     # img.save('./sample.JPEG', 'JPEG')
     # print img.shape
-    model = sealion_vgg16(5)
-    model.fit_generator(generator=train_gen, steps_per_epoch=1, epochs=4, validation_data=None)
 
+    model = sealion_vgg16(5)
+    model.fit_generator(generator=train_gen, steps_per_epoch=8, epochs=2, validation_data=None)
 
