@@ -148,6 +148,7 @@ def load_model(path, model):
 ############################
 if __name__ == '__main__':
     train_path = "/Users/ibm/GitRepo/Sealion/data/train.txt"
+    model_checkpoint_dir = "/home/hao/Desktop/sealion_training_data/sealion_vgg_weights"
     train_gen = sealion_gen(train_path, resize=True)
     # batch = train_gen.next()
     # batch2 = train_gen.next()
@@ -160,5 +161,7 @@ if __name__ == '__main__':
     # print img.shape
 
     model = sealion_vgg16(5)
-    model.fit_generator(generator=train_gen, steps_per_epoch=8, epochs=2, validation_data=None)
+    # https://keras.io/callbacks/
+    weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:02d}-{val_loss:.2f}.hdf5", monitor='val_loss', verbose=0, save_best_only=False, mode='auto', period=100)
+    model.fit_generator(generator=train_gen, steps_per_epoch=8, epochs=2, validation_data=None, callbacks=[weight_save_callback])
 
