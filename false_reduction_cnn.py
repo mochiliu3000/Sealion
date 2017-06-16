@@ -1,6 +1,7 @@
 import numpy as np
 from PIL import Image
-from random import shuffle
+from random import shuffle, randint
+import re
 
 from keras.layers.core import Dropout
 from keras.layers.convolutional import Conv2D
@@ -10,6 +11,7 @@ from keras.layers import Input, Flatten, Dense
 from keras.models import Model
 from keras.optimizers import Adam
 from keras import applications
+from keras.callbacks import ModelCheckpoint
 from sklearn.preprocessing import LabelBinarizer
 from collections import deque
 
@@ -23,23 +25,48 @@ generate sea lion images with given yolo format.
 imges should be in the folder: JPEGImages
 labels should be in the folder: labels
 """
-def sealion_gen(path_file, resize):
+def sealion_gen(path_file, resize, max_num_per_class=15000, max_num_per_pos_img=5, max_num_per_neg_img=10):
     ## end symbol is included in the line
-
     img_path_list = open(path_file).read().splitlines()
     # img_path_list = [line[:-1] for line in open(path_file)]
     shuffle(img_path_list)
-    label_path_list = [(img_path[:-4].replace("JPEGImages", "labels") + "txt") for img_path in img_path_list]
+    label_path_list = [(img_path[:-4].replace("JPEGImages", "labels") + "txt") for img_path in img_path_list] # Need to make sure the image is stored in JPEGImages, while labels are stored in labels
 
     pair_pool = deque([])
+    counter_list = [0] * 5 # Global counter list, count how many 64*64 images of each class has been appended into pair_pool
+    pattern = re.compile(r'ng_[\d]+\.JPEG')
+
     for index, img_path in enumerate(img_path_list):
+        # Parse the img_path, if it has 'ng_[0-9]+.JPEG', it is high weighted negative image
+        if pattern.match(img_path) != None and counter_list[4] < max_num_per_class:
+            # Randomly gen small image, num <= max_num_per_neg_img
+            imgs = fetch_random_img(img_path, max_num_per_neg_img, img_size_width)
+            for img in imgs:
+                pair_pool.append((img, 4))
+            counter_list[4] += max_num_per_neg_img
+            continue
+
+        # Check the num of lines, if zero, it is normal weighted negative image
+        num_lines = sum(1 for line in open(img_path))
+        if num_lines == 0 and counter_list[4] < max_num_per_class:
+            # Randomly gen small image, num <= max_num_per_pos_img
+            imgs = fetch_random_img(img_path, max_num_per_pos_img, img_size_width)
+            for img in imgs:
+                pair_pool.append((img, 4))
+            counter_list[4] += max_num_per_pos_img
+            continue
+
         label_path = label_path_list[index]
         origin = Image.open(img_path)
         origin_w, origin_h = origin.size
+        counter_list_this_img = [0] * 4 
         for line in open(label_path):
             line_split = line.split()
             kind, center_x_ratio, center_y_ratio, w_ratio, h_ratio = \
                 int(line_split[0]), float(line_split[1]), float(line_split[2]), float(line_split[3]), float(line_split[4])
+            if counter_list[kind] >= max_num_per_class or counter_list_this_img[kind] >= max_num_per_pos_img: # if already get too many image for this sealion class or for this img
+                print("WARN: Too many cuts for img %s, and for class %s Skip 1 line ..." % (label_path, kind))
+                continue
             center_x = origin_w * center_x_ratio
             center_y = origin_h * center_y_ratio
             half_w = origin_w * w_ratio * 0.5
@@ -49,6 +76,8 @@ def sealion_gen(path_file, resize):
             if resize:
                 img = img.resize((img_size_width, img_size_height), resize_algorithm)
             pair_pool.append((img, kind))
+            counter_list[kind] += 1
+            counter_list_this_img[kind] += 1
 
         # encoder = LabelBinarizer()
 
@@ -68,6 +97,25 @@ def one_hot(x):
     one_hot_array = np.array([0., 0., 0., 0., 0.])
     one_hot_array[x] = 1.
     return one_hot_array
+
+
+def fetch_random_img(img_path, num_fetch, size_fetch):
+    origin = Image.open(img_path)
+    origin_w, origin_h = origin.size
+    half_size = int(size_fetch / 2)
+    w_range = (half_size + 1, origin_w - half_size - 1)
+    h_range = (half_size + 1, origin_h - half_size - 1)
+    imgs = [] 
+   
+    for i in range(num_fetch):
+        w_center = randint(*w_range)
+        h_center = randint(*h_range)
+        box = (w_center - half_size, h_center - half_size, w_center + half_size, h_center + half_size)
+        img = origin.crop(box)
+        imgs.append(img)
+    return imgs
+
+
 
 """
 This is only a template
@@ -147,7 +195,7 @@ def load_model(path, model):
 ##          Main          ##
 ############################
 if __name__ == '__main__':
-    train_path = "/Users/ibm/GitRepo/Sealion/data/train.txt"
+    train_path = "/home/hao/Desktop/sealion_training_data/out/all.txt"
     model_checkpoint_dir = "/home/hao/Desktop/sealion_training_data/sealion_vgg_weights"
     train_gen = sealion_gen(train_path, resize=True)
     # batch = train_gen.next()
@@ -163,5 +211,5 @@ if __name__ == '__main__':
     model = sealion_vgg16(5)
     # https://keras.io/callbacks/
     weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:02d}-{val_loss:.2f}.hdf5", monitor='val_loss', verbose=0, save_best_only=False, mode='auto', period=100)
-    model.fit_generator(generator=train_gen, steps_per_epoch=8, epochs=2, validation_data=None, callbacks=[weight_save_callback])
+    model.fit_generator(generator=train_gen, steps_per_epoch=32, epochs=2000, validation_data=None, callbacks=[weight_save_callback])
 
