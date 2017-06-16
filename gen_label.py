@@ -5,9 +5,10 @@ import operator
 import matplotlib.pylab as plt
 import collections
 import numpy as np
+from random import randint
 
 label_dir = "/home/hao/Desktop/sealion_training_data/labels"
-image_dir = "/home/hao/Desktop/sealion_training_data/Train_split"
+image_dir = "/home/hao/Desktop/sealion_training_data/JPEGImages"
 dot_image_dir = "/home/hao/Desktop/sealion_training_data/TrainDotted_split"
 out_dir = "/home/hao/Desktop/sealion_training_data/out" # user defined to store validation images and labels
 
@@ -16,6 +17,8 @@ darknet_dir = "/home/hao/darknet"
 valid_txt_dir = out_dir + "/valid_sealion.txt"
 neg_img_dir = "/home/hao/Desktop/sealion_training_data/negative_split" # put images under neg_img_dir/JPEGImages, labels under neg_img_dir/labels
 valid_pred_dir = "/home/hao/Desktop/sealion_training_data/Valid_pred" # user defined to store validation predictions
+marked_img_dir = "/home/hao/Desktop/sealion_training_data/yolo_mark_imgs" # manually marked image dir
+
 
 def gen_nonzero_label(label_dir, image_dir, out_dir):
     if not os.path.exists(label_dir):
@@ -26,6 +29,23 @@ def gen_nonzero_label(label_dir, image_dir, out_dir):
                 num_lines = sum(1 for line in open(label_dir + "/" + label_file))
                 if num_lines > 0:
                     tr_file.write(image_dir + "/" + label_file[:-3] + "JPEG\n")
+
+
+def gen_nonzero_multiple_folder_label(label_dirs, image_dirs, out_dir):
+    if len(label_dirs) != len(image_dirs):
+        print("ERROR: The length of label_dirs is not equal to image_dirs")
+    else:
+        with open(out_dir + "/all.txt", "wb") as tr_file:
+            for l_d, i_d in zip(label_dirs, image_dirs):
+                for l_f in os.listdir(l_d):
+                    print("Working on %s" % l_f)
+                    num_lines = sum(1 for line in open(l_d + "/" + l_f))
+                    if num_lines > 0:
+                        tr_file.write(i_d + "/" + l_f[:-3] + "JPEG\n")
+                    else:
+                        if randint(0, 8) < 3:
+                            tr_file.write(i_d + "/" + l_f[:-3] + "JPEG\n")
+            
 
 def gen_empty_label(image_dir, label_dir):
     img_list = os.listdir(image_dir)
@@ -251,10 +271,14 @@ if __name__ == '__main__':
     # batch_rename("./data/Yolo_mark_result/JPEGImages")
     # gen_less_female_nonzero_label(label_dir, image_dir, out_dir, 0.05, True)
     # gen_empty_label("./data/negative_split", "/home/sleepywyn/Dev/GitRepo/Sealion/data/negative_split")
+    
+    image_dirs = [image_dir, neg_img_dir+"/JPEGImages", marked_img_dir+"/JPEGImages"]
+    label_dirs = [label_dir, neg_img_dir+"/labels", marked_img_dir+"/labels"]
+    gen_nonzero_multiple_folder_label(label_dirs, image_dirs, out_dir)
 
-    numbers = re.compile(r'(\d+)')
-    gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
-    gen_neg_label(neg_img_dir, valid_txt_dir)
+    # numbers = re.compile(r'(\d+)')
+    # gen_validation_label(label_dir, image_dir, dot_image_dir, out_dir)
+    # gen_neg_label(neg_img_dir, valid_txt_dir)
     
     # trigger_validation(darknet_dir, weight_dir, valid_txt_dir, valid_pred_dir)
     
