@@ -35,6 +35,7 @@ def gen_nonzero_multiple_folder_label(label_dirs, image_dirs, out_dir):
     if len(label_dirs) != len(image_dirs):
         print("ERROR: The length of label_dirs is not equal to image_dirs")
     else:
+        pattern = re.compile(r'ng_[\d]+\.JPEG')
         with open(out_dir + "/all.txt", "wb") as tr_file:
             for l_d, i_d in zip(label_dirs, image_dirs):
                 for l_f in os.listdir(l_d):
@@ -43,7 +44,8 @@ def gen_nonzero_multiple_folder_label(label_dirs, image_dirs, out_dir):
                     if num_lines > 0:
                         tr_file.write(i_d + "/" + l_f[:-3] + "JPEG\n")
                     else:
-                        if randint(0, 8) < 3:
+                        if randint(0, 8) < 4 or pattern.match(l_f) != None:
+                            print("Adding zero label file %s" % l_f)
                             tr_file.write(i_d + "/" + l_f[:-3] + "JPEG\n")
             
 
