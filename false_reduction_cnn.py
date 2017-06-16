@@ -37,6 +37,7 @@ def sealion_gen(path_file, resize, max_num_per_class=15000, max_num_per_pos_img=
     pattern = re.compile(r'ng_[\d]+\.JPEG')
 
     for index, img_path in enumerate(img_path_list):
+        print(">>>>>>>>>>" + str(counter_list))
         # Parse the img_path, if it has 'ng_[0-9]+.JPEG', it is high weighted negative image
         if pattern.match(img_path) != None and counter_list[4] < max_num_per_class:
             # Randomly gen small image, num <= max_num_per_neg_img
