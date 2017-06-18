@@ -211,6 +211,6 @@ if __name__ == '__main__':
 
     model = sealion_vgg16(5)
     # https://keras.io/callbacks/
-    weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:02d}-{val_loss:.2f}.hdf5", monitor='val_loss', verbose=0, save_best_only=False, mode='auto', period=100)
+    weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:02d}-{loss:.2f}.hdf5", monitor='loss', verbose=0, save_best_only=False, mode='auto', period=100)
     model.fit_generator(generator=train_gen, steps_per_epoch=32, epochs=2000, validation_data=None, callbacks=[weight_save_callback])
 
