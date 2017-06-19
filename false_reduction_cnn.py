@@ -116,6 +116,20 @@ def fetch_random_img(img_path, num_fetch, size_fetch):
         imgs.append(img)
     return imgs
 
+"""
+generate and save label for classification. the first use case is yolo classification on a small training set
+"""
+def generate_and_save(path_file, img_dir, label_dir, resize=False, epohes=400, max_num_per_class=1000):
+    train_gen = sealion_gen(path_file, resize, max_num_per_class=1000)
+    counter = 0
+    for _ in range(0, epohes):
+        input_array, target_array = train_gen.next()
+        for index, img in enumerate(input_array):
+            kind = target_array[index]
+            img.save(img_dir + '/' + 'classification_' + str(counter) + '.JPEG', 'JPEG')
+            with open(label_dir + "/" + 'classification_' + str(counter) + ".txt", "wb") as file:
+                file.write(str(kind) + " " + str(0.5) + " " + str(0.5) + " " + str(0.98) + " " + str(0.98) + "\n")
+            counter += 1
 
 
 """
