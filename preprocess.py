@@ -333,5 +333,3 @@ if __name__ == '__main__':
 
     extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)
 
-    
-

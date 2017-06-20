@@ -25,7 +25,7 @@ generate sea lion images with given yolo format.
 imges should be in the folder: JPEGImages
 labels should be in the folder: labels
 """
-def sealion_gen(path_file, resize, max_num_per_class=60000, max_num_per_pos_img=5, max_num_per_neg_img=10):
+def sealion_gen(path_file, resize, max_num_per_class=60000, max_num_per_pos_img=5, max_num_per_neg_img=10, output_format='ndarray'):
     ## end symbol is included in the line
     img_path_list = open(path_file).read().splitlines()
     # img_path_list = [line[:-1] for line in open(path_file)]
@@ -90,10 +90,20 @@ def sealion_gen(path_file, resize, max_num_per_class=60000, max_num_per_pos_img=
             counter = 0
             while counter < gen_pool_thresh:
                 input, target = pair_pool.popleft()
-                tmp_x.append(np.transpose(input, (2, 0, 1)))
-                tmp_y.append(one_hot(target))
+                if output_format == 'ndarray':
+                    tmp_x.append(np.transpose(input, (2, 0, 1)))
+                    tmp_y.append(one_hot(target))
+                elif output_format == 'img':
+                    tmp_x.append(input)
+                    tmp_y.append(target)
+                else:
+                    print "output format should be either ndarray or img"
                 counter += 1
-            yield (np.array(tmp_x), np.array(tmp_y))
+
+            if output_format == 'ndarray':
+                yield (np.array(tmp_x), np.array(tmp_y))
+            elif output_format == 'img':
+                yield tmp_x, tmp_y
 
 
 def one_hot(x):
@@ -122,7 +132,7 @@ def fetch_random_img(img_path, num_fetch, size_fetch):
 generate and save label for classification. the first use case is yolo classification on a small training set
 """
 def generate_and_save(path_file, img_dir, label_dir, resize=False, epohes=400, max_num_per_class=1000):
-    train_gen = sealion_gen(path_file, resize, max_num_per_class=1000)
+    train_gen = sealion_gen(path_file, resize, max_num_per_class=1000, output_format='img')
     counter = 0
     for _ in range(0, epohes):
         input_array, target_array = train_gen.next()
@@ -230,4 +240,6 @@ if __name__ == '__main__':
     # https://keras.io/callbacks/
     weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:04d}-{loss:.3f}.hdf5", monitor='loss', verbose=0, save_best_only=False, mode='auto', period=50)
     model.fit_generator(generator=train_gen, steps_per_epoch=32, epochs=3000, validation_data=None, callbacks=[weight_save_callback])
+
+    # generate_and_save("/Users/ibm/GitRepo/Sealion/data/train.txt", "/Users/ibm/GitRepo/Sealion/data/Yolo_mark_all/JPEGImages_classify", "/Users/ibm/GitRepo/Sealion/data/Yolo_mark_all/labels_classify")
 
