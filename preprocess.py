@@ -5,6 +5,7 @@ import skimage.feature
 # from sklearn.preprocessing import LabelBinarizer
 import cv2
 import csv
+import re
 from PIL import Image
 from sets import Set
 from multiprocessing import Pool
@@ -274,6 +275,37 @@ def reverse_label(direction, x, y, width, height):
     if direction == "vertical":
         return x, 1-y, width, height
 
+
+def read_and_save(path_file, img_dir, label_dir):
+    img_name_regex = re.compile("^.+/JPEGImages/(.+)\.jpg$")
+    img_path_list = open(path_file).read().splitlines()
+    label_path_list = [(img_path[:-3].replace("JPEGImages", "labels") + "txt") for img_path in img_path_list]
+
+    for index, img_path in enumerate(img_path_list):
+        img_name = img_name_regex.search(img_path).group(1)
+        print "processing" + str(img_name)
+        pairs = []
+        label_path = label_path_list[index]
+        origin = Image.open(img_path)
+        origin_w, origin_h = origin.size
+        for line in open(label_path):
+            line_split = line.split()
+            kind, center_x_ratio, center_y_ratio, w_ratio, h_ratio = \
+                int(line_split[0]), float(line_split[1]), float(line_split[2]), float(line_split[3]), float(line_split[4])
+            center_x = origin_w * center_x_ratio
+            center_y = origin_h * center_y_ratio
+            half_w = origin_w * w_ratio * 0.5
+            half_h = origin_h * h_ratio * 0.5
+            box = (int(round(center_x - half_w)), int(round(center_y - half_h)), int(round(center_x + half_w)), int(round(center_y + half_h)))
+            img = origin.crop(box)
+            pairs.append((img, kind))
+        counter = 0
+        for (img, kind) in pairs:
+            img.save(img_dir + "/classify_" + img_name + "_" + str(counter) + ".JPEG", "JPEG")
+            with open(label_dir + "/classify_" + img_name + "_" + str(counter) + ".txt", "wb") as file:
+                file.write(str(kind) + " " + str(0.5) + " " + str(0.5) + " " + str(0.98) + " " + str(0.98) + "\n")
+            counter += 1
+
 if __name__ == '__main__':
     train_path = "./data/Train"
     train_dotted_path = "./data/TrainDotted"
@@ -300,3 +332,6 @@ if __name__ == '__main__':
     # split_images(test_path, test_split_dst, skipped_img_ids)
 
     extract_coords(train_split_dst, train_dotted_split_dst, out_dir=label_dir)
+
+    
+

@@ -128,8 +128,8 @@ def generate_and_save(path_file, img_dir, label_dir, resize=False, epohes=400, m
         input_array, target_array = train_gen.next()
         for index, img in enumerate(input_array):
             kind = target_array[index]
-            img.save(img_dir + '/' + 'classification_' + str(counter) + '.JPEG', 'JPEG')
-            with open(label_dir + "/" + 'classification_' + str(counter) + ".txt", "wb") as file:
+            img.save(img_dir + '/' + 'classify_' + str(counter) + '.JPEG', 'JPEG')
+            with open(label_dir + "/" + 'classify_' + str(counter) + ".txt", "wb") as file:
                 file.write(str(kind) + " " + str(0.5) + " " + str(0.5) + " " + str(0.98) + " " + str(0.98) + "\n")
             counter += 1
 
