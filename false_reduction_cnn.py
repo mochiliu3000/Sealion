@@ -18,14 +18,14 @@ from collections import deque
 img_size_width = 64
 img_size_height = 64
 resize_algorithm = Image.BILINEAR
-gen_pool_thresh = 8
+gen_pool_thresh = 32
 
 """
 generate sea lion images with given yolo format.
 imges should be in the folder: JPEGImages
 labels should be in the folder: labels
 """
-def sealion_gen(path_file, resize, max_num_per_class=15000, max_num_per_pos_img=5, max_num_per_neg_img=10):
+def sealion_gen(path_file, resize, max_num_per_class=60000, max_num_per_pos_img=5, max_num_per_neg_img=10):
     ## end symbol is included in the line
     img_path_list = open(path_file).read().splitlines()
     # img_path_list = [line[:-1] for line in open(path_file)]
@@ -36,6 +36,8 @@ def sealion_gen(path_file, resize, max_num_per_class=15000, max_num_per_pos_img=
     counter_list = [0] * 5 # Global counter list, count how many 64*64 images of each class has been appended into pair_pool
     pattern = re.compile(r'ng_[\d]+\.JPEG')
 
+    img_path_list = img_path_list * 5
+    label_path_list = label_path_list * 5
     for index, img_path in enumerate(img_path_list):
         print(">>>>>>>>>>" + str(counter_list))
         # Parse the img_path, if it has 'ng_[0-9]+.JPEG', it is high weighted negative image
@@ -121,23 +123,23 @@ def fetch_random_img(img_path, num_fetch, size_fetch):
 """
 This is only a template
 """
-def sealion_cnn():
-    inputs = Input((1, 64, 64))
+def sealion_cnn(classes=5):
+    inputs = Input((3, img_size_height, img_size_width))
     conv1 = Conv2D(64, (3, 3), activation='relu', padding='same', data_format='channels_first')(inputs)
-    conv1 = Dropout(0.2)(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2), data_format='channels_first')(conv1)
 
     conv2 = Conv2D(128, (3, 3), activation='relu', padding='same', data_format='channels_first')(pool1)
-    conv2 = Dropout(0.2)(conv2)
-    pool2 = MaxPooling2D(pool_size=(2, 2), data_format='channels_first')(conv2)
+    # pool2 = MaxPooling2D(pool_size=(2, 2), data_format='channels_first')(conv2)
 
-    flatten = Flatten()(pool2)
+    flatten = Flatten()(conv2)
     dense1 = Dense(512, activation='relu')(flatten)
-    dense2 = Dense(5, activation='softmax')(dense1)
+    dense1 = Dropout(0.3)(dense1)
+    dense2 = Dense(classes, activation='softmax')(dense1)
 
     model = Model(input=inputs, output=dense2)
     model.summary()
-    model.compile(loss='categorical_crossentropy',optimizer='adam', metrics=['accuracy'])
+    adam_d = Adam(lr=0.001, decay=1e-5)
+    model.compile(loss='categorical_crossentropy',optimizer=adam_d, metrics=['accuracy'])
 
     return model
 
@@ -209,8 +211,9 @@ if __name__ == '__main__':
     # img.save('./sample.JPEG', 'JPEG')
     # print img.shape
 
-    model = sealion_vgg16(5)
+    model = sealion_cnn(5)
+    # model = sealion_vgg16(5)
     # https://keras.io/callbacks/
-    weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:02d}-{loss:.2f}.hdf5", monitor='loss', verbose=0, save_best_only=False, mode='auto', period=100)
-    model.fit_generator(generator=train_gen, steps_per_epoch=32, epochs=2000, validation_data=None, callbacks=[weight_save_callback])
+    weight_save_callback = ModelCheckpoint(model_checkpoint_dir+"/weights.{epoch:04d}-{loss:.3f}.hdf5", monitor='loss', verbose=0, save_best_only=False, mode='auto', period=50)
+    model.fit_generator(generator=train_gen, steps_per_epoch=32, epochs=3000, validation_data=None, callbacks=[weight_save_callback])
 
