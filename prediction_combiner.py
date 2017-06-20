@@ -118,6 +118,13 @@ def sum_prediction(df):
         'juvenile': sum,
         'ad_female': sum
     })
+	
+def merge_csv_result(csv800,csv500,out_path):
+    with open(out_path, "wb") as csv_file:
+        csv800.sort_values('img_id')
+        csv500.sort_values('img_id')
+        mergedData= pd.concat([csv800['img_id'], csv800['ad_male'], csv800['sub_male'], csv500['juvenile'], csv500['ad_female']], axis=1)
+        mergedData.to_csv(csv_file, sep=',', index=False)
 
 if __name__ == '__main__':
 
