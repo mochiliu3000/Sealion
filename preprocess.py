@@ -306,6 +306,13 @@ def read_and_save(path_file, img_dir, label_dir):
                 file.write(str(kind) + " " + str(0.5) + " " + str(0.5) + " " + str(0.98) + " " + str(0.98) + "\n")
             counter += 1
 
+def join_txt_content(path1, path2, outdir):
+    set1 = set(open(path1).read().splitlines())
+    set2 = set(open(path1).read().splitlines())
+    set3 = set1.intersection(set2)
+    with open(outdir, "wb") as file:
+        file.write('\n'.join(set3))
+
 if __name__ == '__main__':
     train_path = "./data/Train"
     train_dotted_path = "./data/TrainDotted"
