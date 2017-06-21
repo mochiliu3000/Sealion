@@ -87,10 +87,10 @@ def extract_coord(train_path, train_dot_path, out_dir, filename):
                 elif r < 100 and b < 100 and 150 < g < 200: # GREEN pups 
                     print "Here is a pup, won't track it"
                     continue
-                elif r < 100 and  100 < b and g < 100: # BLUE juveniles 34.0
+                elif r < 100 and  100 < b and g < 100 and b > (r + g): # BLUE juveniles 34.0
                     x1, x2, y1, y2 = x - 34.0/2.0, x + 34.0/2.0, y - 34.0/2.0, y + 34.0/2.0
                     inx = 2
-                elif r < 150 and b < 50 and g < 100:  # BROWN adult_females 53.6
+                elif 50 < r < 150 and b < 50 and 20 < g < 100:  # BROWN adult_females 53.6
                     x1, x2, y1, y2 = x - 53.6/2.0, x + 53.6/2.0, y - 53.6/2.0, y + 53.6/2.0
                     inx = 3					
                 else:
